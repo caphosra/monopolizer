@@ -9,6 +9,7 @@ pub struct Board {
     pub players: Vec<Player>,
     pub places: Vec<Box<dyn BoardPlace>>,
     pub turn: usize,
+    logs: Vec<String>,
 }
 
 impl Board {
@@ -17,7 +18,16 @@ impl Board {
             players,
             places: get_place_list(),
             turn: 0,
+            logs: vec![],
         }
+    }
+
+    pub fn get_logs(&self) -> &Vec<String> {
+        &self.logs
+    }
+
+    pub fn log(&mut self, log: String) {
+        self.logs.push(log);
     }
 
     pub fn info(&self) -> String {
@@ -50,36 +60,45 @@ impl Board {
 
     pub fn exec_action(&mut self, action: BoardAction) {
         let turn = self.turn;
-        let current_player = self.get_mut_current_player();
         match action {
             BoardAction::None(msg) => {
-                println!("[PLAYER{}] {}", turn, msg);
+                self.log(format!("[PLAYER{}] {}", turn, msg));
             }
             BoardAction::PayToBank(msg, dollars) => {
-                println!(
+                self.log(format!(
                     "[PLAYER{}] Pays ${} to the bank for {}.",
                     turn, dollars, msg
-                );
-                current_player.pay(dollars);
+                ));
+
+                let current_player = self.get_mut_current_player();
+                let mut logs = current_player.pay(dollars);
+                self.logs.append(&mut logs);
             }
             BoardAction::PayToOther(msg, receiver, dollars) => {
-                println!(
+                self.log(format!(
                     "[PLAYER{}] Pays ${} to PLAYER{} for {}.",
                     turn, dollars, receiver, msg
-                );
+                ));
 
-                current_player.pay(dollars);
+                let current_player = self.get_mut_current_player();
+                let mut logs = current_player.pay(dollars);
+                self.logs.append(&mut logs);
 
                 let receiver = self.get_mut_player(receiver);
                 receiver.money += dollars;
             }
             BoardAction::Reward(msg, dollars) => {
-                println!("[PLAYER{}] Gains ${} for {}.", turn, dollars, msg);
+                self.logs
+                    .push(format!("[PLAYER{}] Gains ${} for {}.", turn, dollars, msg));
+
+                let current_player = self.get_mut_current_player();
                 current_player.money += dollars;
             }
             BoardAction::Move(msg, mut place) => {
-                println!("[PLAYER{}] Needs to move for {}.", turn, msg);
+                self.logs
+                    .push(format!("[PLAYER{}] Needs to move for {}.", turn, msg));
 
+                let current_player = self.get_mut_current_player();
                 let position = current_player.position;
                 if place < position {
                     place += self.places.len();
@@ -89,7 +108,10 @@ impl Board {
             BoardAction::GivePlace(place, dollars) => {
                 let place_name = self.places[place].get_place_name();
 
-                println!("[PLAYER{}] Buys {} for ${}.", turn, place_name, dollars);
+                self.log(format!(
+                    "[PLAYER{}] Buys {} for ${}.",
+                    turn, place_name, dollars
+                ));
 
                 self.exec_action(BoardAction::PayToBank(place_name, dollars));
 
@@ -99,8 +121,9 @@ impl Board {
                 }
             }
             BoardAction::GetJailed => {
-                println!("[PLAYER{}] Gets jailed.", turn);
+                self.log(format!("[PLAYER{}] Gets jailed.", turn));
 
+                let current_player = self.get_mut_current_player();
                 current_player.state = PlayerState::InJail(0);
                 current_player.position = JAIL_POSITION;
             }
@@ -188,5 +211,12 @@ impl Board {
                 }
             },
         }
+    }
+
+    pub fn get_players_on_place(&self, place_id: usize) -> Vec<&Player> {
+        self.players
+            .iter()
+            .filter(|player| player.position == place_id)
+            .collect()
     }
 }

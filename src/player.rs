@@ -22,13 +22,22 @@ impl Player {
         }
     }
 
-    pub fn pay(&mut self, dollars: u32) {
-        println!(
-            "[PLAYER{}] Money: ${} -> ${}",
-            self.player_id,
-            self.money,
-            self.money - dollars
-        );
-        self.money -= dollars;
+    pub fn pay(&mut self, dollars: u32) -> Vec<String> {
+        if self.money < dollars {
+            self.money = 0;
+
+            self.state = PlayerState::Bankrupted;
+
+            vec![format!("[PLAYER{}] Bankrupted", self.player_id,)]
+        } else {
+            self.money -= dollars;
+
+            vec![format!(
+                "[PLAYER{}] Money: ${} -> ${}",
+                self.player_id,
+                self.money + dollars,
+                self.money
+            )]
+        }
     }
 }
