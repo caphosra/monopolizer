@@ -12,7 +12,6 @@ pub fn render_place<'a, B: Backend>(
     f: &mut Frame<B>,
     place: &'a Box<dyn BoardPlace>,
     players: &'a Vec<Player>,
-    board: &'a Board,
     area: Rect,
 ) {
     let owner = place
@@ -193,11 +192,11 @@ pub fn get_board_renderer<'a, B: Backend>(
 
                 if let Some(place) = place {
                     match (x, y) {
-                        (0, y) => render_place(f, place, players, board, left_side_layouts[y]),
-                        (10, y) => render_place(f, place, players, board, right_side_layouts[y]),
-                        (x, 0) => render_place(f, place, players, board, above_side_layouts[x - 1]),
+                        (0, y) => render_place(f, place, players, left_side_layouts[y]),
+                        (10, y) => render_place(f, place, players, right_side_layouts[y]),
+                        (x, 0) => render_place(f, place, players, above_side_layouts[x - 1]),
                         (x, 10) => {
-                            render_place(f, place, players, board, bottom_side_layouts[x - 1])
+                            render_place(f, place, players, bottom_side_layouts[x - 1])
                         }
                         _ => {}
                     };
