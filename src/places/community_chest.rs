@@ -42,6 +42,10 @@ impl BoardPlace for CommunityChest {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        panic!("The price of Community Chest is undefined.");
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::None
     }

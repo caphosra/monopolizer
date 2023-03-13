@@ -43,6 +43,10 @@ impl BoardPlace for Nothing {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        panic!("The price is undefined.");
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::None
     }

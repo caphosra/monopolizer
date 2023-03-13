@@ -42,6 +42,10 @@ impl BoardPlace for GoToJail {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        panic!("The price of Go to Jail is undefined.");
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::None
     }

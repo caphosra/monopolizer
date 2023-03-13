@@ -67,6 +67,10 @@ impl BoardPlace for Utilities {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        150
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::Utilities
     }

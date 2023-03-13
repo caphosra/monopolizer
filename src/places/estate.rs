@@ -63,6 +63,10 @@ impl BoardPlace for Estate {
         Some(self.houses)
     }
 
+    fn get_price(&self) -> u32 {
+        self.price
+    }
+
     fn set_num_houses(&mut self, num: u8) {
         self.houses = num;
     }

@@ -68,6 +68,7 @@ pub trait BoardPlace {
     fn get_num_houses(&self) -> Option<u8>;
     fn set_num_houses(&mut self, num: u8);
     fn get_price_of_house(&self) -> Option<u32>;
+    fn get_price(&self) -> u32;
     fn get_color(&self) -> BoardColor;
     fn is_mortgaged(&self) -> bool;
     fn set_mortgaged(&mut self, mortgaged: bool) -> u32;

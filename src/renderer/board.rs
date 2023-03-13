@@ -4,6 +4,7 @@ use tui::style::{Color, Style};
 use tui::widgets::{Block, Borders, Paragraph};
 use tui::Frame;
 
+use crate::appraiser::Appraiser;
 use crate::board::Board;
 use crate::places::{BoardColor, BoardPlace};
 use crate::player::{Player, PlayerState};
@@ -149,15 +150,20 @@ pub fn get_board_renderer<'a, B: Backend>(
                 PlayerState::None => ("ACTIVE".to_string(), Color::Green),
             };
 
-            let paragraph = Paragraph::new(format!("${}\nSTATUS: {}", player.money, player_state))
-                .block(
-                    Block::default()
-                        .title(format!("Player{}", player.player_id))
-                        .title_alignment(Alignment::Center)
-                        .borders(Borders::ALL)
-                        .border_style(Style::default().fg(color)),
-                )
-                .alignment(Alignment::Center);
+            let paragraph = Paragraph::new(format!(
+                "${} (${})\nSTATUS: {}",
+                player.money,
+                Appraiser::appraise(player, board),
+                player_state
+            ))
+            .block(
+                Block::default()
+                    .title(format!("Player{}", player.player_id))
+                    .title_alignment(Alignment::Center)
+                    .borders(Borders::ALL)
+                    .border_style(Style::default().fg(color)),
+            )
+            .alignment(Alignment::Center);
 
             f.render_widget(paragraph, player_infos_layouts[i])
         }

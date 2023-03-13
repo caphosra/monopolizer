@@ -42,6 +42,10 @@ impl BoardPlace for Chance {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        panic!("The price of Chance is undefined.");
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::None
     }

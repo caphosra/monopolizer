@@ -42,6 +42,10 @@ impl BoardPlace for IncomeTax {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        panic!("The price of Income Tax is undefined.");
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::None
     }

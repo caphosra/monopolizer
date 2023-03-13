@@ -68,6 +68,10 @@ impl BoardPlace for Railroad {
         None
     }
 
+    fn get_price(&self) -> u32 {
+        200
+    }
+
     fn get_color(&self) -> BoardColor {
         BoardColor::Railroad
     }
