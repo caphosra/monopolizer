@@ -8,20 +8,6 @@ pub struct Railroad {
     mortgaged: bool,
 }
 
-impl Railroad {
-    fn get_own_num(&self, board: &Board) -> u32 {
-        board
-            .places
-            .iter()
-            .filter(|place| {
-                place.get_color() == BoardColor::Railroad
-                    && place.get_owner() == self.owner
-                    && place.is_mortgaged() == false
-            })
-            .count() as u32
-    }
-}
-
 impl BoardPlace for Railroad {
     fn info(&self) -> String {
         if let Some(owner) = self.owner {
@@ -39,9 +25,9 @@ impl BoardPlace for Railroad {
         self.name
     }
 
-    fn get_action<'a>(&self, board: &Board) -> BoardAction<'a> {
+    fn get_action<'a>(&self, turn: usize, board: &Board) -> BoardAction<'a> {
         if let Some(owner) = self.owner {
-            if owner == board.turn {
+            if owner == turn {
                 BoardAction::None("Lands their place.")
             } else {
                 if self.mortgaged {
@@ -86,12 +72,13 @@ impl BoardPlace for Railroad {
         BoardColor::Railroad
     }
 
-    fn is_monopolized(&self, _: &Board) -> bool {
-        false
-    }
-
     fn is_mortgaged(&self) -> bool {
         self.mortgaged
+    }
+
+    fn set_mortgaged(&mut self, mortgaged: bool) -> u32 {
+        self.mortgaged = mortgaged;
+        100
     }
 }
 
@@ -103,5 +90,17 @@ impl Railroad {
             owner: None,
             mortgaged: false,
         })
+    }
+
+    fn get_own_num(&self, board: &Board) -> u32 {
+        board
+            .places
+            .iter()
+            .filter(|place| {
+                place.get_color() == BoardColor::Railroad
+                    && place.get_owner() == self.owner
+                    && place.is_mortgaged() == false
+            })
+            .count() as u32
     }
 }

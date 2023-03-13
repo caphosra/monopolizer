@@ -18,7 +18,7 @@ impl BoardPlace for GoToJail {
         "Go to Jail"
     }
 
-    fn get_action<'a>(&self, _: &Board) -> BoardAction<'a> {
+    fn get_action<'a>(&self, _: usize, _: &Board) -> BoardAction<'a> {
         BoardAction::GetJailed
     }
 
@@ -46,12 +46,12 @@ impl BoardPlace for GoToJail {
         BoardColor::None
     }
 
-    fn is_monopolized(&self, _: &Board) -> bool {
+    fn is_mortgaged(&self) -> bool {
         false
     }
 
-    fn is_mortgaged(&self) -> bool {
-        false
+    fn set_mortgaged(&mut self, _: bool) -> u32 {
+        panic!("You cannot mortgage Go to Jail.");
     }
 }
 

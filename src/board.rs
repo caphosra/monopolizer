@@ -1,41 +1,34 @@
 use crate::actions::BoardAction;
 use crate::dice_rolling::{DiceResult, DiceRolling};
-use crate::places::{get_place_list, BoardPlace};
+use crate::places::{get_place_list, BoardColor, BoardPlace};
 use crate::player::{Player, PlayerState};
+use crate::strategy::ExpensiveHousesProtectionStrategy;
 
 const JAIL_POSITION: usize = 10;
 
-pub struct Board {
+pub struct MonopolyGame {
     pub players: Vec<Player>,
-    pub places: Vec<Box<dyn BoardPlace>>,
+    pub board: Board,
     pub turn: usize,
-    logs: Vec<String>,
+    pub logs: Vec<String>,
 }
 
-impl Board {
-    pub fn new(players: Vec<Player>) -> Self {
-        Board {
-            players,
-            places: get_place_list(),
-            turn: 0,
-            logs: vec![],
-        }
-    }
+impl MonopolyGame {
+    pub fn new(player_num: u32) -> Self {
+        let players = (0..player_num)
+            .map(|id| Player::new(id as usize, ExpensiveHousesProtectionStrategy::new()))
+            .collect::<Vec<_>>();
 
-    pub fn get_logs(&self) -> &Vec<String> {
-        &self.logs
+        MonopolyGame {
+            players,
+            board: Board::new(),
+            turn: 0,
+            logs: Vec::new(),
+        }
     }
 
     pub fn log(&mut self, log: String) {
         self.logs.push(log);
-    }
-
-    pub fn info(&self) -> String {
-        self.places
-            .iter()
-            .map(|place| place.info())
-            .collect::<Vec<String>>()
-            .join("\n")
     }
 
     pub fn get_mut_player(&mut self, id: usize) -> &mut Player {
@@ -70,8 +63,8 @@ impl Board {
                     turn, dollars, msg
                 ));
 
-                let current_player = self.get_mut_current_player();
-                let mut logs = current_player.pay(dollars);
+                let current_player = &mut self.players[turn as usize];
+                let mut logs = current_player.pay(&mut self.board, dollars);
                 self.logs.append(&mut logs);
             }
             BoardAction::PayToOther(msg, receiver, dollars) => {
@@ -80,8 +73,8 @@ impl Board {
                     turn, dollars, receiver, msg
                 ));
 
-                let current_player = self.get_mut_current_player();
-                let mut logs = current_player.pay(dollars);
+                let current_player = &mut self.players[turn as usize];
+                let mut logs = current_player.pay(&mut self.board, dollars);
                 self.logs.append(&mut logs);
 
                 let receiver = self.get_mut_player(receiver);
@@ -101,12 +94,12 @@ impl Board {
                 let current_player = self.get_mut_current_player();
                 let position = current_player.position;
                 if place < position {
-                    place += self.places.len();
+                    place += self.board.places.len();
                 }
                 self.move_player(place - position)
             }
             BoardAction::GivePlace(place, dollars) => {
-                let place_name = self.places[place].get_place_name();
+                let place_name = self.board.places[place].get_place_name();
 
                 self.log(format!(
                     "[PLAYER{}] Buys {} for ${}.",
@@ -117,7 +110,7 @@ impl Board {
 
                 let current_player = self.get_current_player();
                 if PlayerState::Bankrupted != current_player.state {
-                    self.places[place].set_owner(turn);
+                    self.board.places[place].set_owner(turn);
                 }
             }
             BoardAction::GetJailed => {
@@ -133,25 +126,25 @@ impl Board {
     pub fn move_player(&mut self, count: usize) {
         let current_player = self.get_mut_current_player();
         let previous_position = current_player.position;
-        let previous_position_name = self.places[previous_position].get_place_name();
+        let previous_position_name = self.board.places[previous_position].get_place_name();
 
         let mut new_position = previous_position + count;
-        if new_position >= self.places.len() {
-            new_position -= self.places.len();
+        if new_position >= self.board.places.len() {
+            new_position -= self.board.places.len();
 
             self.exec_action(BoardAction::Reward("passing GO", 200))
         }
 
         let current_player = self.get_mut_current_player();
         current_player.position = new_position;
-        let new_position_name = self.places[new_position].get_place_name();
+        let new_position_name = self.board.places[new_position].get_place_name();
 
         self.exec_action(BoardAction::None(&format!(
             "Moves from {} to {}.",
             previous_position_name, new_position_name
         )));
 
-        self.exec_action(self.places[new_position].get_action(self));
+        self.exec_action(self.board.places[new_position].get_action(self.turn, &self.board));
     }
 
     pub fn spend_one_turn(&mut self) {
@@ -218,5 +211,32 @@ impl Board {
             .iter()
             .filter(|player| player.position == place_id)
             .collect()
+    }
+}
+
+pub struct Board {
+    pub places: Vec<Box<dyn BoardPlace>>,
+}
+
+impl Board {
+    pub fn new() -> Self {
+        Board {
+            places: get_place_list(),
+        }
+    }
+
+    pub fn is_monopolized(&self, color: BoardColor) -> bool {
+        let mut owners = self.places.iter().filter_map(|place| {
+            if place.get_color() == color {
+                Some(place.get_owner())
+            } else {
+                None
+            }
+        });
+        if let Some(possible_owner) = owners.next().unwrap() {
+            owners.all(|owner| owner == Some(possible_owner))
+        } else {
+            false
+        }
     }
 }

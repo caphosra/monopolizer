@@ -19,7 +19,7 @@ impl BoardPlace for Nothing {
         self.name
     }
 
-    fn get_action<'a>(&self, _: &Board) -> BoardAction<'a> {
+    fn get_action<'a>(&self, _: usize, _: &Board) -> BoardAction<'a> {
         BoardAction::None(self.name)
     }
 
@@ -47,12 +47,12 @@ impl BoardPlace for Nothing {
         BoardColor::None
     }
 
-    fn is_monopolized(&self, _: &Board) -> bool {
+    fn is_mortgaged(&self) -> bool {
         false
     }
 
-    fn is_mortgaged(&self) -> bool {
-        false
+    fn set_mortgaged(&mut self, _: bool) -> u32 {
+        panic!("You cannot mortgage it.");
     }
 }
 

@@ -6,14 +6,14 @@ use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
-use crate::board::Board;
+use crate::board::MonopolyGame;
 use crate::renderer::board::get_board_renderer;
 use crate::renderer::logs::get_logs_renderer;
 
 mod board;
 mod logs;
 
-pub fn start_render_loop(board: &mut Board) -> Result<(), Box<dyn Error>> {
+pub fn start_render_loop(game: &mut MonopolyGame) -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
 
     let stdout = stdout();
@@ -26,8 +26,12 @@ pub fn start_render_loop(board: &mut Board) -> Result<(), Box<dyn Error>> {
     terminal.clear()?;
     loop {
         match terminal_selection {
-            0 => terminal.draw(get_board_renderer(board)),
-            1 => terminal.draw(get_logs_renderer(board, &mut current_scroll)),
+            0 => terminal.draw(get_board_renderer(
+                game.turn,
+                &game.players,
+                &mut game.board,
+            )),
+            1 => terminal.draw(get_logs_renderer(&game.logs, &mut current_scroll)),
             _ => panic!("The tui needed is invalid."),
         }?;
 
@@ -36,7 +40,7 @@ pub fn start_render_loop(board: &mut Board) -> Result<(), Box<dyn Error>> {
                 break;
             }
             if key.code == KeyCode::Char('s') {
-                board.spend_one_turn();
+                game.spend_one_turn();
             }
             if key.code == KeyCode::Up {
                 current_scroll -= 1;
@@ -46,7 +50,7 @@ pub fn start_render_loop(board: &mut Board) -> Result<(), Box<dyn Error>> {
             }
             if key.code == KeyCode::Down {
                 if key.modifiers.contains(KeyModifiers::SHIFT) {
-                    current_scroll = board.get_logs().len() as i32;
+                    current_scroll = game.logs.len() as i32;
                 } else {
                     current_scroll += 1;
                 }

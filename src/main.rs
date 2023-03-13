@@ -1,10 +1,3 @@
-use std::error::Error;
-use std::io::{stdin, stdout, BufRead, Write};
-
-use crate::board::Board;
-use crate::player::Player;
-use crate::renderer::start_render_loop;
-
 pub mod actions;
 pub mod appraiser;
 pub mod board;
@@ -14,15 +7,15 @@ pub mod player;
 pub mod renderer;
 pub mod strategy;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let mut board: Option<Board> = None;
-    loop {
-        if let Some(board) = &mut board {
-            for log in board.get_logs() {
-                println!("{}", log);
-            }
-        }
+use std::error::Error;
+use std::io::{stdin, stdout, BufRead, Write};
 
+use crate::board::MonopolyGame;
+use crate::renderer::start_render_loop;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut game: Option<MonopolyGame> = None;
+    loop {
         print!("> ");
         stdout().flush().unwrap();
 
@@ -37,28 +30,27 @@ fn main() -> Result<(), Box<dyn Error>> {
             break;
         }
         if args.len() == 2 && args[0] == "init" {
-            if let Ok(place) = args[1].parse::<usize>() {
-                let players: Vec<Player> = (0..place).map(|id| Player::new(id)).collect();
-                board = Some(Board::new(players));
+            if let Ok(player_num) = args[1].parse::<u32>() {
+                game = Some(MonopolyGame::new(player_num));
             }
         }
         if args.len() == 1 && args[0] == "step" {
-            if let Some(board) = &mut board {
-                board.spend_one_turn()
+            if let Some(game) = &mut game {
+                game.spend_one_turn();
             }
         }
         if args.len() == 2 && args[0] == "step" {
-            if let Some(board) = &mut board {
+            if let Some(game) = &mut game {
                 if let Ok(count) = args[1].parse::<i32>() {
                     for _ in 0..count {
-                        board.spend_one_turn()
+                        game.spend_one_turn();
                     }
                 }
             }
         }
         if args.len() == 1 && args[0] == "v" {
-            if let Some(board) = &mut board {
-                start_render_loop(board)?;
+            if let Some(game) = &mut game {
+                start_render_loop(game)?;
             }
         }
     }

@@ -1,17 +1,17 @@
 use tui::backend::Backend;
-use tui::layout::{Alignment, Direction, Rect};
-use tui::layout::{Constraint, Layout};
+use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Style};
 use tui::widgets::{Block, Borders, Paragraph};
 use tui::Frame;
 
 use crate::board::Board;
 use crate::places::{BoardColor, BoardPlace};
-use crate::player::PlayerState;
+use crate::player::{Player, PlayerState};
 
 pub fn render_place<'a, B: Backend>(
     f: &mut Frame<B>,
     place: &'a Box<dyn BoardPlace>,
+    players: &'a Vec<Player>,
     board: &'a Board,
     area: Rect,
 ) {
@@ -28,10 +28,15 @@ pub fn render_place<'a, B: Backend>(
         (false, None) => "".to_string(),
     };
 
-    let players_on_place = board.get_players_on_place(place.get_id());
-    let players_on_place = players_on_place
+    let players_on_place = players
         .iter()
-        .map(|player| player.player_id.to_string())
+        .filter_map(|player| {
+            if player.position == place.get_id() {
+                Some(player.player_id.to_string())
+            } else {
+                None
+            }
+        })
         .collect::<Vec<_>>()
         .join(",");
 
@@ -64,7 +69,11 @@ pub fn render_place<'a, B: Backend>(
     f.render_widget(paragraph, area);
 }
 
-pub fn get_board_renderer<'a, B: Backend>(board: &'a mut Board) -> impl FnOnce(&mut Frame<B>) + 'a {
+pub fn get_board_renderer<'a, B: Backend>(
+    turn: usize,
+    players: &'a Vec<Player>,
+    board: &'a mut Board,
+) -> impl FnOnce(&mut Frame<B>) + 'a {
     move |f| {
         let layouts = Layout::default()
             .direction(Direction::Horizontal)
@@ -110,7 +119,7 @@ pub fn get_board_renderer<'a, B: Backend>(board: &'a mut Board) -> impl FnOnce(&
             .margin(5)
             .split(center_layout);
 
-        let paragraph = Paragraph::new(format!("Player{}", board.turn))
+        let paragraph = Paragraph::new(format!("Player{}", turn))
             .block(
                 Block::default()
                     .title("NEXT TURN")
@@ -121,7 +130,7 @@ pub fn get_board_renderer<'a, B: Backend>(board: &'a mut Board) -> impl FnOnce(&
             .alignment(Alignment::Center);
         f.render_widget(paragraph, player_infos_layouts[0]);
 
-        let player_num = board.players.len();
+        let player_num = players.len();
         let player_infos_layouts = Layout::default()
             .direction(Direction::Vertical)
             .constraints(
@@ -131,7 +140,7 @@ pub fn get_board_renderer<'a, B: Backend>(board: &'a mut Board) -> impl FnOnce(&
             )
             .split(player_infos_layouts[1]);
 
-        for (i, player) in board.players.iter().enumerate().into_iter() {
+        for (i, player) in players.iter().enumerate().into_iter() {
             let (player_state, color) = match player.state {
                 PlayerState::Bankrupted => ("BANKRUPTED".to_string(), Color::Red),
                 PlayerState::InJail(turn) => (
@@ -184,10 +193,12 @@ pub fn get_board_renderer<'a, B: Backend>(board: &'a mut Board) -> impl FnOnce(&
 
                 if let Some(place) = place {
                     match (x, y) {
-                        (0, y) => render_place(f, place, board, left_side_layouts[y]),
-                        (10, y) => render_place(f, place, board, right_side_layouts[y]),
-                        (x, 0) => render_place(f, place, board, above_side_layouts[x - 1]),
-                        (x, 10) => render_place(f, place, board, bottom_side_layouts[x - 1]),
+                        (0, y) => render_place(f, place, players, board, left_side_layouts[y]),
+                        (10, y) => render_place(f, place, players, board, right_side_layouts[y]),
+                        (x, 0) => render_place(f, place, players, board, above_side_layouts[x - 1]),
+                        (x, 10) => {
+                            render_place(f, place, players, board, bottom_side_layouts[x - 1])
+                        }
                         _ => {}
                     };
                 }

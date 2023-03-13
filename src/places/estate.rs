@@ -34,9 +34,9 @@ impl BoardPlace for Estate {
         self.name
     }
 
-    fn get_action<'a>(&self, board: &Board) -> BoardAction<'a> {
+    fn get_action<'a>(&self, turn: usize, board: &Board) -> BoardAction<'a> {
         if let Some(owner) = self.owner {
-            if owner == board.turn {
+            if owner == turn {
                 BoardAction::None("Lands their place.")
             } else {
                 if self.mortgaged {
@@ -75,20 +75,13 @@ impl BoardPlace for Estate {
         self.color.clone()
     }
 
-    fn is_monopolized(&self, board: &Board) -> bool {
-        if let Some(owner) = self.get_owner() {
-            board
-                .places
-                .iter()
-                .filter(|place| place.get_color() == self.color)
-                .all(|place| place.get_owner() == Some(owner))
-        } else {
-            false
-        }
-    }
-
     fn is_mortgaged(&self) -> bool {
         self.mortgaged
+    }
+
+    fn set_mortgaged(&mut self, mortgaged: bool) -> u32 {
+        self.mortgaged = mortgaged;
+        self.price / 2
     }
 }
 
@@ -117,7 +110,8 @@ impl Estate {
     }
 
     pub fn get_rent(&self, board: &Board) -> u32 {
-        let rent_id = self.is_monopolized(board) as u8 + self.houses;
+        let color = self.get_color();
+        let rent_id = board.is_monopolized(color) as u8 + self.houses;
         self.rent[rent_id as usize]
     }
 }

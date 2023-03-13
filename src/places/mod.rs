@@ -43,19 +43,34 @@ impl Display for BoardColor {
     }
 }
 
+impl BoardColor {
+    pub fn get_estate_colors() -> Vec<BoardColor> {
+        vec![
+            BoardColor::Brown,
+            BoardColor::LightBlue,
+            BoardColor::LightPurple,
+            BoardColor::Orange,
+            BoardColor::Red,
+            BoardColor::Yellow,
+            BoardColor::Green,
+            BoardColor::Blue,
+        ]
+    }
+}
+
 pub trait BoardPlace {
     fn info(&self) -> String;
     fn get_id(&self) -> usize;
     fn get_place_name(&self) -> &'static str;
-    fn get_action<'a>(&self, board: &Board) -> BoardAction<'a>;
+    fn get_action<'a>(&self, turn: usize, board: &Board) -> BoardAction<'a>;
     fn get_owner(&self) -> Option<usize>;
     fn set_owner(&mut self, owner: usize);
     fn get_num_houses(&self) -> Option<u8>;
     fn set_num_houses(&mut self, num: u8);
     fn get_price_of_house(&self) -> Option<u32>;
     fn get_color(&self) -> BoardColor;
-    fn is_monopolized(&self, board: &Board) -> bool;
     fn is_mortgaged(&self) -> bool;
+    fn set_mortgaged(&mut self, mortgaged: bool) -> u32;
 }
 
 pub fn get_place_list() -> Vec<Box<dyn BoardPlace>> {
