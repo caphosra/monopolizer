@@ -51,8 +51,8 @@ impl BoardPlace for Utilities {
         self.owner
     }
 
-    fn set_owner(&mut self, owner: usize) {
-        self.owner = Some(owner);
+    fn set_owner(&mut self, owner: Option<usize>) {
+        self.owner = owner;
     }
 
     fn get_num_houses(&self) -> Option<u8> {

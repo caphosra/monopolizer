@@ -26,7 +26,7 @@ impl BoardPlace for GoToJail {
         None
     }
 
-    fn set_owner(&mut self, _: usize) {
+    fn set_owner(&mut self, _: Option<usize>) {
         panic!("You cannot set the owner of Go to Jail.");
     }
 

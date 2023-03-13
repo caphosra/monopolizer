@@ -64,8 +64,26 @@ impl MonopolyGame {
                 ));
 
                 let current_player = &mut self.players[turn as usize];
-                let mut logs = current_player.pay(&mut self.board, dollars);
+                let (result, mut logs) = current_player.pay(&mut self.board, dollars);
                 self.logs.append(&mut logs);
+
+                if let Err(_) = result {
+                    self.log(format!(
+                        "[PLAYER{}] All of the properties are returned to the bank.",
+                        turn
+                    ));
+
+                    let player_places = self
+                        .board
+                        .places
+                        .iter_mut()
+                        .filter(|place| place.get_owner() == Some(turn));
+                    for place in player_places {
+                        place.set_owner(None);
+                        place.set_mortgaged(false);
+                        place.set_num_houses(0);
+                    }
+                }
             }
             BoardAction::PayToOther(msg, receiver, dollars) => {
                 self.log(format!(
@@ -74,11 +92,34 @@ impl MonopolyGame {
                 ));
 
                 let current_player = &mut self.players[turn as usize];
-                let mut logs = current_player.pay(&mut self.board, dollars);
+                let (result, mut logs) = current_player.pay(&mut self.board, dollars);
                 self.logs.append(&mut logs);
 
-                let receiver = self.get_mut_player(receiver);
-                receiver.money += dollars;
+                match result {
+                    Ok(_) => {
+                        let receiver = self.get_mut_player(receiver);
+                        receiver.money += dollars;
+                    }
+                    Err(money) => {
+                        let receiver = self.get_mut_player(receiver);
+                        receiver.money += money;
+                        let receiver_id = receiver.player_id;
+
+                        self.log(format!(
+                            "[PLAYER{}] Inherits properties of PLAYER{}.",
+                            receiver_id, turn
+                        ));
+
+                        let player_places = self
+                            .board
+                            .places
+                            .iter_mut()
+                            .filter(|place| place.get_owner() == Some(turn));
+                        for place in player_places {
+                            place.set_owner(Some(receiver_id));
+                        }
+                    }
+                }
             }
             BoardAction::Reward(msg, dollars) => {
                 self.logs
@@ -109,8 +150,8 @@ impl MonopolyGame {
                 self.exec_action(BoardAction::PayToBank(place_name, dollars));
 
                 let current_player = self.get_current_player();
-                if PlayerState::Bankrupted != current_player.state {
-                    self.board.places[place].set_owner(turn);
+                if current_player.state != PlayerState::Bankrupted {
+                    self.board.places[place].set_owner(Some(turn));
                 }
             }
             BoardAction::GetJailed => {

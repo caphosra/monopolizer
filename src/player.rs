@@ -27,35 +27,33 @@ impl Player {
         }
     }
 
-    pub fn pay(&mut self, board: &mut Board, dollars: u32) -> Vec<String> {
-        if self.money < dollars {
-            match self.strategy.raise(board, self, dollars) {
-                Ok(money) => {
-                    self.money = money;
+    pub fn pay(&mut self, board: &mut Board, dollars: u32) -> (Result<(), u32>, Vec<String>) {
+        match self.strategy.raise(
+            dollars,
+            board,
+            self.player_id,
+            &mut self.money,
+            &self.state,
+            self.position,
+        ) {
+            Ok(_) => (
+                Ok(()),
+                vec![format!(
+                    "[PLAYER{}] Money: ${} -> ${}",
+                    self.player_id,
+                    self.money + dollars,
+                    self.money
+                )],
+            ),
+            Err(money) => {
+                self.money = 0;
+                self.state = PlayerState::Bankrupted;
 
-                    vec![format!(
-                        "[PLAYER{}] Money: ${} -> ${}",
-                        self.player_id,
-                        self.money + dollars,
-                        self.money
-                    )]
-                }
-                Err(_) => {
-                    self.money = 0;
-                    self.state = PlayerState::Bankrupted;
-
-                    vec![format!("[PLAYER{}] Bankrupted", self.player_id)]
-                }
+                (
+                    Err(money),
+                    vec![format!("[PLAYER{}] Bankrupted", self.player_id)],
+                )
             }
-        } else {
-            self.money -= dollars;
-
-            vec![format!(
-                "[PLAYER{}] Money: ${} -> ${}",
-                self.player_id,
-                self.money + dollars,
-                self.money
-            )]
         }
     }
 }

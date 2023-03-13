@@ -64,7 +64,7 @@ pub trait BoardPlace {
     fn get_place_name(&self) -> &'static str;
     fn get_action<'a>(&self, turn: usize, board: &Board) -> BoardAction<'a>;
     fn get_owner(&self) -> Option<usize>;
-    fn set_owner(&mut self, owner: usize);
+    fn set_owner(&mut self, owner: Option<usize>);
     fn get_num_houses(&self) -> Option<u8>;
     fn set_num_houses(&mut self, num: u8);
     fn get_price_of_house(&self) -> Option<u32>;

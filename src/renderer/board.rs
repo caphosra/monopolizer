@@ -195,9 +195,7 @@ pub fn get_board_renderer<'a, B: Backend>(
                         (0, y) => render_place(f, place, players, left_side_layouts[y]),
                         (10, y) => render_place(f, place, players, right_side_layouts[y]),
                         (x, 0) => render_place(f, place, players, above_side_layouts[x - 1]),
-                        (x, 10) => {
-                            render_place(f, place, players, bottom_side_layouts[x - 1])
-                        }
+                        (x, 10) => render_place(f, place, players, bottom_side_layouts[x - 1]),
                         _ => {}
                     };
                 }

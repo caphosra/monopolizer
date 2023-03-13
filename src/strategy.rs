@@ -1,9 +1,18 @@
 use crate::board::Board;
 use crate::places::BoardColor;
-use crate::player::Player;
+use crate::player::PlayerState;
 
 pub trait ArrangementStrategy {
-    fn raise(&self, board: &mut Board, player: &Player, dollars: u32) -> Result<u32, u32>;
+    fn raise(
+        &self,
+        debt: u32,
+        board: &mut Board,
+        player_id: usize,
+        money: &mut u32,
+        state: &PlayerState,
+        position: usize,
+    ) -> Result<(), u32>;
+    //fn build(&self, board: &mut Board, money: &mut u32, state: &PlayerState, position: usize);
 }
 
 pub struct ExpensiveHousesProtectionStrategy;
@@ -15,11 +24,18 @@ impl ExpensiveHousesProtectionStrategy {
 }
 
 impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
-    fn raise(&self, board: &mut Board, player: &Player, debt: u32) -> Result<u32, u32> {
-        let mut money = player.money;
-        if money >= debt {
-            money -= debt;
-            return Ok(money);
+    fn raise(
+        &self,
+        debt: u32,
+        board: &mut Board,
+        player_id: usize,
+        money: &mut u32,
+        _: &PlayerState,
+        _: usize,
+    ) -> Result<(), u32> {
+        if *money >= debt {
+            *money -= debt;
+            return Ok(());
         }
 
         // Mortgages the places not monopolized.
@@ -27,7 +43,7 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             .places
             .iter()
             .filter(|place| {
-                place.get_owner() == Some(player.player_id)
+                place.get_owner() == Some(player_id)
                     && !board.is_monopolized(place.get_color())
                     && !place.is_mortgaged()
             })
@@ -36,10 +52,10 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
 
         for place_id in players_places {
             let place = &mut board.places[place_id];
-            money += place.set_mortgaged(true);
-            if money >= debt {
-                money -= debt;
-                return Ok(money);
+            *money += place.set_mortgaged(true);
+            if *money >= debt {
+                *money -= debt;
+                return Ok(());
             }
         }
 
@@ -47,7 +63,7 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             .places
             .iter()
             .filter(|place| {
-                place.get_owner() == Some(player.player_id)
+                place.get_owner() == Some(player_id)
                     && board.is_monopolized(place.get_color())
                     && !place.is_mortgaged()
                     && place.get_num_houses() == Some(0)
@@ -57,10 +73,10 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
 
         for place_id in players_places {
             let place = &mut board.places[place_id];
-            money += place.set_mortgaged(true);
-            if money >= debt {
-                money -= debt;
-                return Ok(money);
+            *money += place.set_mortgaged(true);
+            if *money >= debt {
+                *money -= debt;
+                return Ok(());
             }
         }
 
@@ -72,7 +88,7 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                     place.get_color() == color
                         && board.is_monopolized(place.get_color())
                         && !place.is_mortgaged()
-                        && place.get_owner() == Some(player.player_id)
+                        && place.get_owner() == Some(player_id)
                 })
                 .map(|place| (place.get_id(), place.get_num_houses().unwrap()))
                 .collect::<Vec<_>>();
@@ -86,12 +102,12 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
 
                 let (id, num_houses) = places_id_houses.first().unwrap();
 
-                money += board.places[*id].get_price_of_house().unwrap() / 2;
+                *money += board.places[*id].get_price_of_house().unwrap() / 2;
                 board.places[*id].set_num_houses(num_houses - 1);
 
-                if money >= debt {
-                    money -= debt;
-                    return Ok(money);
+                if *money >= debt {
+                    *money -= debt;
+                    return Ok(());
                 }
 
                 houses -= 1;
@@ -100,15 +116,15 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             // Mortgages the places. Prioritizes the cheaper place.
             places_id_houses.sort_by(|(id1, _), (id2, _)| id1.cmp(id2));
             for (id, _) in places_id_houses {
-                money += board.places[id].set_mortgaged(true);
+                *money += board.places[id].set_mortgaged(true);
 
-                if money >= debt {
-                    money -= debt;
-                    return Ok(money);
+                if *money >= debt {
+                    *money -= debt;
+                    return Ok(());
                 }
             }
         }
 
-        Err(money)
+        Err(*money)
     }
 }
