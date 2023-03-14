@@ -1,6 +1,7 @@
 use crate::board::Board;
 use crate::places::BoardColor;
 use crate::player::PlayerState;
+use std::collections::HashSet;
 
 pub trait ArrangementStrategy {
     fn raise(
@@ -12,7 +13,15 @@ pub trait ArrangementStrategy {
         state: &PlayerState,
         position: usize,
     ) -> Result<(), u32>;
-    //fn build(&self, board: &mut Board, money: &mut u32, state: &PlayerState, position: usize);
+
+    fn invest(
+        &self,
+        board: &mut Board,
+        player_id: usize,
+        money: &mut u32,
+        state: &PlayerState,
+        position: usize,
+    );
 }
 
 pub struct ExpensiveHousesProtectionStrategy;
@@ -38,20 +47,25 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             return Ok(());
         }
 
+        let mut monopolized_color = HashSet::new();
+        for color in BoardColor::get_estate_colors() {
+            if board.is_monopolized(color.clone()) {
+                monopolized_color.insert(color);
+            }
+        }
+
+        let mut players_places = board
+            .places
+            .iter_mut()
+            .filter(|place| place.get_owner() == Some(player_id))
+            .collect::<Vec<_>>();
+
         // Mortgages the places not monopolized.
-        let players_places = board
-            .places
-            .iter()
-            .filter(|place| {
-                place.get_owner() == Some(player_id)
-                    && !board.is_monopolized(place.get_color())
-                    && !place.is_mortgaged()
-            })
-            .map(|place| place.get_id())
-            .collect::<Vec<_>>();
+        let players_not_monopolized_places = players_places.iter_mut().filter(|place| {
+            !monopolized_color.contains(&place.get_color()) && !place.is_mortgaged()
+        });
 
-        for place_id in players_places {
-            let place = &mut board.places[place_id];
+        for place in players_not_monopolized_places {
             *money += place.set_mortgaged(true);
             if *money >= debt {
                 *money -= debt;
@@ -59,64 +73,84 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             }
         }
 
-        let players_places = board
-            .places
-            .iter()
-            .filter(|place| {
-                place.get_owner() == Some(player_id)
-                    && board.is_monopolized(place.get_color())
-                    && !place.is_mortgaged()
-                    && place.get_num_houses() == Some(0)
+        let mut players_monopolized_places_with_houses = players_places
+            .iter_mut()
+            .filter_map(|place| {
+                if monopolized_color.contains(&place.get_color()) && !place.is_mortgaged() {
+                    Some((place.get_num_houses().unwrap(), place))
+                } else {
+                    None
+                }
             })
-            .map(|place| place.get_id())
             .collect::<Vec<_>>();
-
-        for place_id in players_places {
-            let place = &mut board.places[place_id];
-            *money += place.set_mortgaged(true);
-            if *money >= debt {
-                *money -= debt;
-                return Ok(());
-            }
-        }
 
         for color in BoardColor::get_estate_colors() {
-            let mut places_id_houses = board
-                .places
+            let sum_of_houses: u8 = players_monopolized_places_with_houses
                 .iter()
-                .filter(|place| {
-                    place.get_color() == color
-                        && board.is_monopolized(place.get_color())
-                        && !place.is_mortgaged()
-                        && place.get_owner() == Some(player_id)
+                .filter_map(|(houses, place)| {
+                    if place.get_color() == color {
+                        Some(houses)
+                    } else {
+                        None
+                    }
                 })
-                .map(|place| (place.get_id(), place.get_num_houses().unwrap()))
+                .sum();
+            if sum_of_houses == 0 {
+                for (_, place) in &mut players_monopolized_places_with_houses {
+                    *money += place.set_mortgaged(true);
+                    if *money >= debt {
+                        *money -= debt;
+                        return Ok(());
+                    }
+                }
+            }
+        }
+
+        let mut players_monopolized_places_with_houses = players_monopolized_places_with_houses
+            .iter_mut()
+            .filter(|(_, place)| !place.is_mortgaged())
+            .collect::<Vec<_>>();
+
+        for color in BoardColor::get_estate_colors() {
+            let mut color_places = players_monopolized_places_with_houses
+                .iter_mut()
+                .filter(|(_, place)| place.get_color() == color)
                 .collect::<Vec<_>>();
+            let mut sum_of_houses: u8 = color_places
+                .iter()
+                .filter_map(|(houses, place)| {
+                    if place.get_color() == color {
+                        Some(houses.clone())
+                    } else {
+                        None
+                    }
+                })
+                .sum();
 
-            let mut houses: u8 = places_id_houses.iter().map(|(_, houses)| houses).sum();
+            while sum_of_houses > 0 {
+                color_places.sort_by(|(houses1, _), (houses2, _)| houses2.cmp(houses1));
 
-            while houses > 0 {
-                places_id_houses.sort_by(|(_, houses1), (_, houses2)| houses2.cmp(houses1));
+                assert_ne!(color_places.len(), 0);
 
-                assert_ne!(places_id_houses.len(), 0);
+                let (houses, place) = color_places.first_mut().unwrap();
 
-                let (id, num_houses) = places_id_houses.first().unwrap();
+                assert!(*houses > 0u8);
 
-                *money += board.places[*id].get_price_of_house().unwrap() / 2;
-                board.places[*id].set_num_houses(num_houses - 1);
+                *money += place.get_price_of_house().unwrap() / 2;
+                place.set_num_houses(*houses - 1);
 
                 if *money >= debt {
                     *money -= debt;
                     return Ok(());
                 }
 
-                houses -= 1;
+                sum_of_houses -= 1;
             }
 
             // Mortgages the places. Prioritizes the cheaper place.
-            places_id_houses.sort_by(|(id1, _), (id2, _)| id1.cmp(id2));
-            for (id, _) in places_id_houses {
-                *money += board.places[id].set_mortgaged(true);
+            color_places.sort_by(|(_, place1), (_, place2)| place1.get_id().cmp(&place2.get_id()));
+            for (_, place) in color_places {
+                *money += place.set_mortgaged(true);
 
                 if *money >= debt {
                     *money -= debt;
@@ -126,5 +160,103 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
         }
 
         Err(*money)
+    }
+
+    fn invest(
+        &self,
+        board: &mut Board,
+        player_id: usize,
+        money: &mut u32,
+        _: &PlayerState,
+        _: usize,
+    ) {
+        let usable = *money as i32 - board.get_most_expensive(player_id) as i32;
+        if usable > 0 {
+            let mut usable = usable as u32;
+
+            let player_places = board
+                .places
+                .iter_mut()
+                .filter(|place| place.get_owner() == Some(player_id));
+
+            let mortgaged_railroads = player_places
+                .filter(|place| place.get_color() == BoardColor::Railroad && place.is_mortgaged());
+            for railroad in mortgaged_railroads {
+                let cost = railroad.get_return_cost();
+                if cost <= usable {
+                    usable -= cost;
+                    *money -= cost;
+                    railroad.set_mortgaged(false);
+                } else {
+                    return;
+                }
+            }
+
+            let colors = BoardColor::get_estate_colors();
+            let mut players_colors = colors
+                .iter()
+                .filter(|color| board.get_monopolizer((*color).clone()) == Some(player_id))
+                .collect::<Vec<_>>();
+            players_colors.sort_by_key(|color| {
+                u8::MAX - board.get_houses_num_by_color((*color).clone()).unwrap()
+            });
+
+            for color in players_colors {
+                let houses_limit =
+                    board.gets_by_color(color.clone()).collect::<Vec<_>>().len() as u8 * 5;
+                let mut houses = board.get_houses_num_by_color(color.clone()).unwrap();
+
+                let mortgaged_places = board
+                    .gets_by_color_mut(color.clone())
+                    .filter(|place| place.is_mortgaged());
+                for place in mortgaged_places {
+                    let cost = place.get_return_cost();
+                    if cost <= usable {
+                        usable -= cost;
+                        *money -= cost;
+                        place.set_mortgaged(false);
+                    } else {
+                        return;
+                    }
+                }
+
+                let mut places = board.gets_by_color_mut(color.clone()).collect::<Vec<_>>();
+                while houses < houses_limit {
+                    places.sort_by_key(|place| place.get_num_houses().unwrap());
+
+                    let place_to_build = places.first_mut().unwrap();
+
+                    assert!(!place_to_build.is_mortgaged());
+
+                    let cost = place_to_build.get_price_of_house().unwrap();
+                    if cost <= usable {
+                        usable -= cost;
+                        *money -= cost;
+                        place_to_build.set_num_houses(place_to_build.get_num_houses().unwrap() + 1);
+                        houses += 1;
+
+                        assert!(place_to_build.get_num_houses().unwrap() <= 5);
+                    } else {
+                        return;
+                    }
+                }
+            }
+
+            let mortgaged_places = board
+                .places
+                .iter_mut()
+                .filter(|place| place.get_owner() == Some(player_id) && place.is_mortgaged());
+
+            for place in mortgaged_places {
+                let cost = place.get_return_cost();
+                if cost <= usable {
+                    usable -= cost;
+                    *money -= cost;
+                    place.set_mortgaged(false);
+                } else {
+                    return;
+                }
+            }
+        }
     }
 }

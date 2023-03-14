@@ -56,4 +56,14 @@ impl Player {
             }
         }
     }
+
+    pub fn invest(&mut self, board: &mut Board) {
+        self.strategy.invest(
+            board,
+            self.player_id,
+            &mut self.money,
+            &self.state,
+            self.position,
+        );
+    }
 }

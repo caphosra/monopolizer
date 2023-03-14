@@ -190,6 +190,11 @@ impl MonopolyGame {
 
     pub fn spend_one_turn(&mut self) {
         self.spend_one_turn_internal(0);
+
+        for player in &mut self.players {
+            player.invest(&mut self.board);
+        }
+
         self.turn += 1;
         if self.turn >= self.players.len() {
             self.turn -= self.players.len();
@@ -266,7 +271,32 @@ impl Board {
         }
     }
 
-    pub fn is_monopolized(&self, color: BoardColor) -> bool {
+    pub fn get_houses_num_by_color(&self, color: BoardColor) -> Option<u8> {
+        let mut num = 0;
+        for place in &self.places {
+            if place.get_color() == color {
+                num += place.get_num_houses()?
+            }
+        }
+        Some(num)
+    }
+
+    pub fn gets_by_color(&self, color: BoardColor) -> impl Iterator<Item = &Box<dyn BoardPlace>> {
+        self.places
+            .iter()
+            .filter(move |place| place.get_color() == color)
+    }
+
+    pub fn gets_by_color_mut(
+        &mut self,
+        color: BoardColor,
+    ) -> impl Iterator<Item = &mut Box<dyn BoardPlace>> {
+        self.places
+            .iter_mut()
+            .filter(move |place| place.get_color() == color)
+    }
+
+    pub fn get_monopolizer(&self, color: BoardColor) -> Option<usize> {
         let mut owners = self.places.iter().filter_map(|place| {
             if place.get_color() == color {
                 Some(place.get_owner())
@@ -275,9 +305,67 @@ impl Board {
             }
         });
         if let Some(possible_owner) = owners.next().unwrap() {
-            owners.all(|owner| owner == Some(possible_owner))
+            if owners.all(|owner| owner == Some(possible_owner)) {
+                Some(possible_owner)
+            } else {
+                None
+            }
         } else {
-            false
+            None
         }
+    }
+
+    pub fn is_monopolized(&self, color: BoardColor) -> bool {
+        self.get_monopolizer(color).is_some()
+    }
+
+    ///
+    /// Validates the board in terms of houses.
+    ///
+    /// After building or destructing houses, you should call this to prevent unintentional behaviors.
+    ///
+    pub fn validate_houses(&self) {
+        for color in BoardColor::get_estate_colors() {
+            let places = self
+                .places
+                .iter()
+                .filter(|place| place.get_color() == color)
+                .collect::<Vec<_>>();
+            let houses = places
+                .iter()
+                .map(|place| place.get_num_houses().unwrap())
+                .collect::<Vec<_>>();
+
+            // If there is at least one house, it infers that these areas are monopolized and that all of them are not mortgaged.
+            if houses.iter().sum::<u8>() > 0 {
+                assert!(
+                    self.is_monopolized(color.clone())
+                        && places.iter().all(|place| !place.is_mortgaged())
+                );
+            }
+
+            // Due to the rule of building (or sometimes destructing) a house, the houses should be built "flatly".
+            assert!(houses.iter().max().unwrap() - houses.iter().min().unwrap() <= 1);
+        }
+    }
+
+    pub fn get_most_expensive(&self, excluding: usize) -> u32 {
+        let mut most_expensive = 0u32;
+        for place in &self.places {
+            match place.get_action(excluding, self) {
+                BoardAction::PayToBank(_, money) => {
+                    if money > most_expensive {
+                        most_expensive = money;
+                    }
+                }
+                BoardAction::PayToOther(_, _, money) => {
+                    if money > most_expensive {
+                        most_expensive = money;
+                    }
+                }
+                _ => {}
+            };
+        }
+        most_expensive
     }
 }

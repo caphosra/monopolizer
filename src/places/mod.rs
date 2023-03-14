@@ -22,7 +22,7 @@ use crate::places::nothing::Nothing;
 use crate::places::railroad::Railroad;
 use crate::places::utilities::Utilities;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum BoardColor {
     None,
     Railroad,
@@ -72,6 +72,12 @@ pub trait BoardPlace {
     fn get_color(&self) -> BoardColor;
     fn is_mortgaged(&self) -> bool;
     fn set_mortgaged(&mut self, mortgaged: bool) -> u32;
+}
+
+impl dyn BoardPlace {
+    pub fn get_return_cost(&self) -> u32 {
+        ((self.get_price() / 2) as f32 * 1.1) as u32
+    }
 }
 
 pub fn get_place_list() -> Vec<Box<dyn BoardPlace>> {
