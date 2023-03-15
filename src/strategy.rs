@@ -4,7 +4,7 @@ use crate::player::PlayerState;
 use std::collections::HashSet;
 
 pub trait ArrangementStrategy {
-    fn raise(
+    fn raise_raw(
         &self,
         debt: u32,
         board: &mut Board,
@@ -14,7 +14,7 @@ pub trait ArrangementStrategy {
         position: usize,
     ) -> Result<(), u32>;
 
-    fn invest(
+    fn invest_raw(
         &self,
         board: &mut Board,
         player_id: usize,
@@ -22,6 +22,59 @@ pub trait ArrangementStrategy {
         state: &PlayerState,
         position: usize,
     );
+}
+
+macro_rules! pay_off_and_quit {
+    ($money: tt, $debt: tt) => {
+        if *$money >= $debt {
+            *$money -= $debt;
+            return Ok(());
+        }
+    };
+}
+
+macro_rules! invest_or_quit {
+    ($money:tt, $usable:tt, $cost:tt) => {
+        if $cost <= $usable {
+            $usable -= $cost;
+            *$money -= $cost;
+        } else {
+            return;
+        }
+    };
+}
+
+impl dyn ArrangementStrategy {
+    pub fn raise(
+        &self,
+        debt: u32,
+        board: &mut Board,
+        player_id: usize,
+        money: &mut u32,
+        state: &PlayerState,
+        position: usize,
+    ) -> Result<(), u32> {
+        pay_off_and_quit!(money, debt);
+
+        let result = self.raise_raw(debt, board, player_id, money, state, position);
+        board.validate_houses();
+
+        result
+    }
+
+    pub fn invest(
+        &self,
+        board: &mut Board,
+        player_id: usize,
+        money: &mut u32,
+        state: &PlayerState,
+        position: usize,
+    ) {
+        let result = self.invest_raw(board, player_id, money, state, position);
+        board.validate_houses();
+
+        result
+    }
 }
 
 pub struct ExpensiveHousesProtectionStrategy;
@@ -33,7 +86,7 @@ impl ExpensiveHousesProtectionStrategy {
 }
 
 impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
-    fn raise(
+    fn raise_raw(
         &self,
         debt: u32,
         board: &mut Board,
@@ -42,11 +95,6 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
         _: &PlayerState,
         _: usize,
     ) -> Result<(), u32> {
-        if *money >= debt {
-            *money -= debt;
-            return Ok(());
-        }
-
         let mut monopolized_color = HashSet::new();
         for color in BoardColor::get_estate_colors() {
             if board.is_monopolized(color.clone()) {
@@ -67,10 +115,8 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
 
         for place in players_not_monopolized_places {
             *money += place.set_mortgaged(true);
-            if *money >= debt {
-                *money -= debt;
-                return Ok(());
-            }
+
+            pay_off_and_quit!(money, debt);
         }
 
         let mut players_monopolized_places_with_houses = players_places
@@ -98,10 +144,8 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             if sum_of_houses == 0 {
                 for (_, place) in &mut players_monopolized_places_with_houses {
                     *money += place.set_mortgaged(true);
-                    if *money >= debt {
-                        *money -= debt;
-                        return Ok(());
-                    }
+
+                    pay_off_and_quit!(money, debt);
                 }
             }
         }
@@ -139,10 +183,7 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                 *money += place.get_price_of_house().unwrap() / 2;
                 place.set_num_houses(*houses - 1);
 
-                if *money >= debt {
-                    *money -= debt;
-                    return Ok(());
-                }
+                pay_off_and_quit!(money, debt);
 
                 sum_of_houses -= 1;
             }
@@ -152,17 +193,14 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             for (_, place) in color_places {
                 *money += place.set_mortgaged(true);
 
-                if *money >= debt {
-                    *money -= debt;
-                    return Ok(());
-                }
+                pay_off_and_quit!(money, debt);
             }
         }
 
         Err(*money)
     }
 
-    fn invest(
+    fn invest_raw(
         &self,
         board: &mut Board,
         player_id: usize,
@@ -183,13 +221,10 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                 .filter(|place| place.get_color() == BoardColor::Railroad && place.is_mortgaged());
             for railroad in mortgaged_railroads {
                 let cost = railroad.get_return_cost();
-                if cost <= usable {
-                    usable -= cost;
-                    *money -= cost;
-                    railroad.set_mortgaged(false);
-                } else {
-                    return;
-                }
+
+                invest_or_quit!(money, usable, cost);
+
+                railroad.set_mortgaged(false);
             }
 
             let colors = BoardColor::get_estate_colors();
@@ -211,13 +246,10 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                     .filter(|place| place.is_mortgaged());
                 for place in mortgaged_places {
                     let cost = place.get_return_cost();
-                    if cost <= usable {
-                        usable -= cost;
-                        *money -= cost;
-                        place.set_mortgaged(false);
-                    } else {
-                        return;
-                    }
+
+                    invest_or_quit!(money, usable, cost);
+
+                    place.set_mortgaged(false);
                 }
 
                 let mut places = board.gets_by_color_mut(color.clone()).collect::<Vec<_>>();
@@ -229,16 +261,12 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                     assert!(!place_to_build.is_mortgaged());
 
                     let cost = place_to_build.get_price_of_house().unwrap();
-                    if cost <= usable {
-                        usable -= cost;
-                        *money -= cost;
-                        place_to_build.set_num_houses(place_to_build.get_num_houses().unwrap() + 1);
-                        houses += 1;
+                    invest_or_quit!(money, usable, cost);
 
-                        assert!(place_to_build.get_num_houses().unwrap() <= 5);
-                    } else {
-                        return;
-                    }
+                    place_to_build.set_num_houses(place_to_build.get_num_houses().unwrap() + 1);
+                    houses += 1;
+
+                    assert!(place_to_build.get_num_houses().unwrap() <= 5);
                 }
             }
 
@@ -249,13 +277,9 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
 
             for place in mortgaged_places {
                 let cost = place.get_return_cost();
-                if cost <= usable {
-                    usable -= cost;
-                    *money -= cost;
-                    place.set_mortgaged(false);
-                } else {
-                    return;
-                }
+                invest_or_quit!(money, usable, cost);
+
+                place.set_mortgaged(false);
             }
         }
     }
