@@ -56,6 +56,21 @@ impl BoardColor {
             BoardColor::Blue,
         ]
     }
+
+    pub fn get_property_colors() -> Vec<BoardColor> {
+        vec![
+            BoardColor::Railroad,
+            BoardColor::Utilities,
+            BoardColor::Brown,
+            BoardColor::LightBlue,
+            BoardColor::LightPurple,
+            BoardColor::Orange,
+            BoardColor::Red,
+            BoardColor::Yellow,
+            BoardColor::Green,
+            BoardColor::Blue,
+        ]
+    }
 }
 
 pub trait BoardPlace {
@@ -77,6 +92,10 @@ pub trait BoardPlace {
 impl dyn BoardPlace {
     pub fn get_return_cost(&self) -> u32 {
         ((self.get_price() / 2) as f32 * 1.1) as u32
+    }
+
+    pub fn is_property(&self) -> bool {
+        self.get_color() != BoardColor::None
     }
 }
 
