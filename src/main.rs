@@ -19,7 +19,7 @@ use crate::renderer::start_render_loop;
 fn main() -> Result<(), Box<dyn Error>> {
     let mut game: Option<MonopolyGame> = None;
     loop {
-        print!("> ");
+        print!("$ ");
         stdout().flush().unwrap();
 
         let mut line = String::new();
@@ -74,7 +74,9 @@ fn main() -> Result<(), Box<dyn Error>> {
             if let Some(game) = &mut game {
                 let iterations: i32 = args[2].parse().unwrap();
                 let turn_num: i32 = args[3].parse().unwrap();
+
                 let mut result = String::new();
+                result += "turn,player,money\n";
 
                 let json = game.to_json();
                 for _ in 0..iterations {
@@ -82,13 +84,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                     for i in 0..turn_num {
                         game.spend_one_turn();
 
-                        let money_infos = game
-                            .players
-                            .iter()
-                            .map(|player| Appraiser::appraise(player, &game.board).to_string())
-                            .collect::<Vec<_>>()
-                            .join(",");
-                        result += &format!("{},{}\n", i + 1, money_infos);
+                        for player in &game.players {
+                            let money_infos = Appraiser::appraise(player, &game.board).to_string();
+                            result += &format!("{},{},{}\n", i + 1, player.player_id, money_infos);
+                        }
                     }
                 }
 
