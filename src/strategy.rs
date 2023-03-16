@@ -97,7 +97,7 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
     ) -> Result<(), u32> {
         let mut monopolized_color = HashSet::new();
         for color in BoardColor::get_estate_colors() {
-            if board.is_monopolized(color.clone()) {
+            if board.get_monopolizer(color.clone()) == Some(player_id) {
                 monopolized_color.insert(color);
             }
         }
@@ -114,6 +114,8 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
         });
 
         for place in players_not_monopolized_places {
+            assert!(place.get_num_houses().unwrap_or(0) == 0);
+
             *money += place.set_mortgaged(true);
 
             pay_off_and_quit!(money, debt);
@@ -131,18 +133,20 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
             .collect::<Vec<_>>();
 
         for color in BoardColor::get_estate_colors() {
-            let sum_of_houses: u8 = players_monopolized_places_with_houses
+            let mut color_places = players_monopolized_places_with_houses
+                .iter_mut()
+                .filter(|(_, place)| place.get_color() == color)
+                .collect::<Vec<_>>();
+            let sum_of_houses: u8 = color_places
                 .iter()
-                .filter_map(|(houses, place)| {
-                    if place.get_color() == color {
-                        Some(houses)
-                    } else {
-                        None
-                    }
+                .map(|(houses, _)| {
+                    houses
                 })
                 .sum();
             if sum_of_houses == 0 {
-                for (_, place) in &mut players_monopolized_places_with_houses {
+                for (_, place) in &mut color_places {
+                    assert!(place.get_num_houses().unwrap_or(0) == 0);
+
                     *money += place.set_mortgaged(true);
 
                     pay_off_and_quit!(money, debt);
@@ -162,12 +166,8 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                 .collect::<Vec<_>>();
             let mut sum_of_houses: u8 = color_places
                 .iter()
-                .filter_map(|(houses, place)| {
-                    if place.get_color() == color {
-                        Some(houses.clone())
-                    } else {
-                        None
-                    }
+                .map(|(houses, _)| {
+                    houses
                 })
                 .sum();
 
@@ -182,15 +182,17 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
 
                 *money += place.get_price_of_house().unwrap() / 2;
                 place.set_num_houses(*houses - 1);
-
-                pay_off_and_quit!(money, debt);
+                *houses -= 1;
 
                 sum_of_houses -= 1;
+
+                pay_off_and_quit!(money, debt);
             }
 
             // Mortgages the places. Prioritizes the cheaper place.
             color_places.sort_by(|(_, place1), (_, place2)| place1.get_id().cmp(&place2.get_id()));
             for (_, place) in color_places {
+                assert!(place.get_num_houses().unwrap() == 0);
                 *money += place.set_mortgaged(true);
 
                 pay_off_and_quit!(money, debt);

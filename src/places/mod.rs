@@ -97,6 +97,11 @@ impl dyn BoardPlace {
     pub fn is_property(&self) -> bool {
         self.get_color() != BoardColor::None
     }
+
+    pub fn is_estate(&self) -> bool {
+        let color = self.get_color();
+        color != BoardColor::None && color != BoardColor::Railroad && color != BoardColor::Utilities
+    }
 }
 
 pub fn get_place_list() -> Vec<Box<dyn BoardPlace>> {

@@ -81,7 +81,9 @@ impl MonopolyGame {
                     for place in player_places {
                         place.set_owner(None);
                         place.set_mortgaged(false);
-                        place.set_num_houses(0);
+                        if place.is_estate() {
+                            place.set_num_houses(0);
+                        }
                     }
                 }
             }
@@ -338,10 +340,8 @@ impl Board {
 
             // If there is at least one house, it infers that these areas are monopolized and that all of them are not mortgaged.
             if houses.iter().sum::<u8>() > 0 {
-                assert!(
-                    self.is_monopolized(color.clone())
-                        && places.iter().all(|place| !place.is_mortgaged())
-                );
+                assert!(self.is_monopolized(color.clone()));
+                assert!(places.iter().all(|&place| !place.is_mortgaged()));
             }
 
             // Due to the rule of building (or sometimes destructing) a house, the houses should be built "flatly".
