@@ -1,0 +1,217 @@
+{
+  "turn": 0,
+  "players": [
+    {
+      "player_id": 0,
+      "money": 500,
+      "is_bankrupted": false,
+      "jail_turn": -1,
+      "position": 20
+    },
+    {
+      "player_id": 1,
+      "money": 500,
+      "is_bankrupted": false,
+      "jail_turn": -1,
+      "position": 10
+    }
+  ],
+  "places": [
+    {
+      "place_id": 1,
+      "place_name": "Mediterranean Avenue",
+      "owner": 1,
+      "is_mortgaged": false,
+      "houses": 5
+    },
+    {
+      "place_id": 3,
+      "place_name": "Baltic Avenue",
+      "owner": 1,
+      "is_mortgaged": false,
+      "houses": 5
+    },
+    {
+      "place_id": 5,
+      "place_name": "Reading Railroad",
+      "owner": 0,
+      "is_mortgaged": false,
+      "houses": -1
+    },
+    {
+      "place_id": 6,
+      "place_name": "Oriental Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 8,
+      "place_name": "Vermont Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 9,
+      "place_name": "Connecticut Avenue",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 11,
+      "place_name": "St. Charles Place",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 12,
+      "place_name": "Electric Company",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": -1
+    },
+    {
+      "place_id": 13,
+      "place_name": "States Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 14,
+      "place_name": "Virginia Avenue",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 15,
+      "place_name": "Pennsylvania Railroad",
+      "owner": 0,
+      "is_mortgaged": false,
+      "houses": -1
+    },
+    {
+      "place_id": 16,
+      "place_name": "St. James Place",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 18,
+      "place_name": "Tennessee Avenue",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 19,
+      "place_name": "New York Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 21,
+      "place_name": "Kentucky Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 23,
+      "place_name": "Indiana Avenue",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 24,
+      "place_name": "Illinois Avenue",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 25,
+      "place_name": "B. & O. Railroad",
+      "owner": 1,
+      "is_mortgaged": false,
+      "houses": -1
+    },
+    {
+      "place_id": 26,
+      "place_name": "Atlantic Avenue",
+      "owner": 0,
+      "is_mortgaged": false,
+      "houses": 2
+    },
+    {
+      "place_id": 27,
+      "place_name": "Ventnor Avenue",
+      "owner": 0,
+      "is_mortgaged": false,
+      "houses": 2
+    },
+    {
+      "place_id": 28,
+      "place_name": "Water Works",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": -1
+    },
+    {
+      "place_id": 29,
+      "place_name": "Marvin Gardens",
+      "owner": 0,
+      "is_mortgaged": false,
+      "houses": 2
+    },
+    {
+      "place_id": 31,
+      "place_name": "Pacific Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 32,
+      "place_name": "North Carolina Avenue",
+      "owner": 0,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 34,
+      "place_name": "Pennsylvania Avenue",
+      "owner": 1,
+      "is_mortgaged": true,
+      "houses": 0
+    },
+    {
+      "place_id": 35,
+      "place_name": "Short Line",
+      "owner": 1,
+      "is_mortgaged": false,
+      "houses": -1
+    },
+    {
+      "place_id": 37,
+      "place_name": "Park Place",
+      "owner": 1,
+      "is_mortgaged": false,
+      "houses": 1
+    },
+    {
+      "place_id": 39,
+      "place_name": "Boardwalk",
+      "owner": 1,
+      "is_mortgaged": false,
+      "houses": 1
+    }
+  ]
+}
