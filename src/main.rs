@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let turn_num: i32 = args[3].parse().unwrap();
 
                 let mut result = String::new();
-                result += "turn,player,money\n";
+                result += "turn,player,money,tap\n";
 
                 let json = game.to_json();
                 for _ in 0..iterations {
@@ -86,7 +86,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                         for player in &game.players {
                             let money_infos = Appraiser::appraise(player, &game.board).to_string();
-                            result += &format!("{},{},{}\n", i + 1, player.player_id, money_infos);
+                            let tap = Appraiser::get_tap(player, &game.board);
+                            result += &format!("{},{},{},{}\n", i + 1, player.player_id, money_infos, tap);
                         }
                     }
                 }

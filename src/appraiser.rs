@@ -1,4 +1,4 @@
-use crate::{board::Board, player::Player};
+use crate::{board::Board, player::Player, actions::BoardAction, places::BoardColor};
 
 pub struct Appraiser;
 
@@ -19,5 +19,36 @@ impl Appraiser {
             .sum::<u32>();
 
         price
+    }
+
+    pub fn get_tap(player: &Player, board: &Board) -> u32 {
+        let mut tap = 0;
+        let mut num_of_utilities = 0;
+        for place in &board.places {
+            if place.get_owner() == Some(player.player_id) {
+                if place.get_color() != BoardColor::Utilities {
+                    match place.get_action(usize::MAX, board) {
+                        BoardAction::PayToOther(_, player_id, money) => {
+                            assert_eq!(player_id, player.player_id);
+
+                            tap += money;
+                        }
+                        _ => {}
+                    };
+                }
+                else {
+                    num_of_utilities += 1;
+                }
+            }
+        }
+
+        tap += match num_of_utilities{
+            0 => 0,
+            1 => 28,
+            2 => 70 * 2,
+            _ => panic!("The number of utilities must be less than or equal to 2.")
+        };
+
+        tap
     }
 }

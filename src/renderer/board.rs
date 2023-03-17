@@ -151,9 +151,10 @@ pub fn get_board_renderer<'a, B: Backend>(
             };
 
             let paragraph = Paragraph::new(format!(
-                "${} (${})\nSTATUS: {}",
+                "${} (${} TAP:{})\nSTATUS: {}",
                 player.money,
                 Appraiser::appraise(player, board),
+                Appraiser::get_tap(player, board),
                 player_state
             ))
             .block(

@@ -43,6 +43,13 @@ impl MonopolyGame {
         &self.players[id]
     }
 
+    pub fn count_active_players(&self) -> usize {
+        self.players.iter().filter(|player| match player.state {
+            PlayerState::Bankrupted => false,
+            _ => true
+        }).count()
+    }
+
     pub fn get_mut_current_player(&mut self) -> &mut Player {
         self.get_mut_player(self.turn as usize)
     }
@@ -191,15 +198,21 @@ impl MonopolyGame {
     }
 
     pub fn spend_one_turn(&mut self) {
-        self.spend_one_turn_internal(0);
-
-        for player in &mut self.players {
-            player.invest(&mut self.board);
+        if self.count_active_players() > 1 {
+            self.spend_one_turn_internal(0);
         }
 
-        self.turn += 1;
-        if self.turn >= self.players.len() {
-            self.turn -= self.players.len();
+        // Since the number of active players can be changed through moving,
+        // check it again here.
+        if self.count_active_players() > 1 {
+            for player in &mut self.players {
+                player.invest(&mut self.board);
+            }
+
+            self.turn += 1;
+            if self.turn >= self.players.len() {
+                self.turn -= self.players.len();
+            }
         }
     }
 
