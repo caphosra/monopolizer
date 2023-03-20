@@ -29,72 +29,75 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let args: Vec<&str> = line.split(" ").collect();
 
-        if args.len() == 1 && args[0] == "exit" {
-            break;
-        }
-        if args.len() == 2 && args[0] == "init" {
-            if let Ok(player_num) = args[1].parse::<u32>() {
-                game = Some(MonopolyGame::new(player_num));
-            }
-        }
-        if args.len() == 1 && args[0] == "step" {
-            if let Some(game) = &mut game {
-                game.spend_one_turn();
-            }
-        }
-        if args.len() == 2 && args[0] == "step" {
-            if let Some(game) = &mut game {
-                if let Ok(count) = args[1].parse::<i32>() {
-                    for _ in 0..count {
-                        game.spend_one_turn();
-                    }
+        match args[..] {
+            ["exit"] | ["q"] => break,
+            ["init" | "i", num] => {
+                if let Ok(player_num) = num.parse::<u32>() {
+                    game = Some(MonopolyGame::new(player_num));
                 }
             }
-        }
-        if args.len() == 1 && args[0] == "v" {
-            if let Some(game) = &mut game {
-                start_render_loop(game)?;
-            }
-        }
-        if args.len() == 2 && args[0] == "save" {
-            if let Some(game) = &mut game {
-                let json = game.to_json();
-                let mut f = File::create(args[1])?;
-                f.write_all(json.as_bytes())?;
-            }
-        }
-        if args.len() == 2 && args[0] == "load" {
-            let mut f = File::open(args[1])?;
-            let mut json = String::new();
-            f.read_to_string(&mut json)?;
-
-            game = Some(MonopolyGame::from_json(&json));
-        }
-        if args.len() == 4 && args[0] == "analyze" {
-            if let Some(game) = &mut game {
-                let iterations: i32 = args[2].parse().unwrap();
-                let turn_num: i32 = args[3].parse().unwrap();
-
-                let mut result = String::new();
-                result += "turn,player,money,tap\n";
-
-                let json = game.to_json();
-                for _ in 0..iterations {
-                    let mut game = MonopolyGame::from_json(&json);
-                    for i in 0..turn_num {
-                        game.spend_one_turn();
-
-                        for player in &game.players {
-                            let money_infos = Appraiser::appraise(player, &game.board).to_string();
-                            let tap = Appraiser::get_tap(player, &game.board);
-                            result += &format!("{},{},{},{}\n", i + 1, player.player_id, money_infos, tap);
+            ["step" | "s"] => {
+                if let Some(game) = &mut game {
+                    if let Ok(count) = args[1].parse::<i32>() {
+                        for _ in 0..count {
+                            game.spend_one_turn();
                         }
                     }
                 }
-
-                let mut f = File::create(args[1])?;
-                f.write_all(result.as_bytes())?;
             }
+            ["vmode" | "v"] => {
+                if let Some(game) = &mut game {
+                    start_render_loop(game)?;
+                }
+            }
+            ["save" | "w", file_name] => {
+                if let Some(game) = &mut game {
+                    let json = game.to_json();
+                    let mut f = File::create(file_name)?;
+                    f.write_all(json.as_bytes())?;
+                }
+            }
+            ["load" | "r", file_name] => {
+                let mut f = File::open(file_name)?;
+                let mut json = String::new();
+                f.read_to_string(&mut json)?;
+
+                game = Some(MonopolyGame::from_json(&json));
+            }
+            ["analyze" | "a", iteration, turn_num] => {
+                if let Some(game) = &mut game {
+                    let iterations: i32 = iteration.parse().unwrap();
+                    let turn_num: i32 = turn_num.parse().unwrap();
+
+                    let mut result = String::new();
+                    result += "turn,player,money,tap\n";
+
+                    let json = game.to_json();
+                    for _ in 0..iterations {
+                        let mut game = MonopolyGame::from_json(&json);
+                        for i in 0..turn_num {
+                            game.spend_one_turn();
+
+                            for player in &game.players {
+                                let money_infos =
+                                    Appraiser::get_payable_money(player, &game.board).to_string();
+                                let tap = Appraiser::get_tap(player, &game.board);
+                                result += &format!(
+                                    "{},{},{},{}\n",
+                                    i + 1,
+                                    player.player_id,
+                                    money_infos,
+                                    tap
+                                );
+                            }
+                        }
+                    }
+
+                    let mut f = File::create(args[1])?;
+                    f.write_all(result.as_bytes())?;
+                }
+            }
+            _ => {}
         }
     }
     Ok(())
