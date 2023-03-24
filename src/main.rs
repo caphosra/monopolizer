@@ -64,7 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 game = Some(MonopolyGame::from_json(&json));
             }
-            ["analyze" | "a", iteration, turn_num] => {
+            ["analyze" | "a", file_name, iteration, turn_num] => {
                 if let Some(game) = &mut game {
                     let iterations: i32 = iteration.parse().unwrap();
                     let turn_num: i32 = turn_num.parse().unwrap();
@@ -93,11 +93,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                         }
                     }
 
-                    let mut f = File::create(args[1])?;
+                    let mut f = File::create(file_name)?;
                     f.write_all(result.as_bytes())?;
                 }
             }
-            _ => {}
+            _ => println!("Unknown command."),
         }
     }
     Ok(())
