@@ -3,7 +3,17 @@ use crate::places::BoardColor;
 use crate::player::PlayerState;
 use std::collections::HashSet;
 
-pub trait ArrangementStrategy {
+///
+/// Determines the player's behavior.
+///
+/// **Do not call functions with a suffix "_raw" directly, which are unintentionally exposed.**
+///
+pub trait PlayerStrategy {
+    ///
+    /// Raises money to pay off the debt.
+    ///
+    /// **Do not call directly. You should use `raise` instead.**
+    ///
     fn raise_raw(
         &self,
         debt: u32,
@@ -14,6 +24,11 @@ pub trait ArrangementStrategy {
         position: usize,
     ) -> Result<(), u32>;
 
+    ///
+    /// Does investment.
+    ///
+    /// **Do not call directly. You should use `invest` instead.**
+    ///
     fn invest_raw(
         &self,
         board: &mut Board,
@@ -24,6 +39,9 @@ pub trait ArrangementStrategy {
     );
 }
 
+///
+/// Quits the function after they pay off the debt. If they cannot do so, does nothing.
+///
 macro_rules! pay_off_and_quit {
     ($money: tt, $debt: tt) => {
         if *$money >= $debt {
@@ -33,6 +51,9 @@ macro_rules! pay_off_and_quit {
     };
 }
 
+///
+/// Quits the function if they don't have enough money to invest. If they have, do investment.
+///
 macro_rules! invest_or_quit {
     ($money:tt, $usable:tt, $cost:tt) => {
         if $cost <= $usable {
@@ -44,7 +65,10 @@ macro_rules! invest_or_quit {
     };
 }
 
-impl dyn ArrangementStrategy {
+impl dyn PlayerStrategy {
+    ///
+    /// Raises money to pay off the debt.
+    ///
     pub fn raise(
         &self,
         debt: u32,
@@ -62,6 +86,9 @@ impl dyn ArrangementStrategy {
         result
     }
 
+    ///
+    /// Does investment.
+    ///
     pub fn invest(
         &self,
         board: &mut Board,
@@ -137,12 +164,7 @@ impl PlayerStrategy for ExpensiveHousesProtectionStrategy {
                 .iter_mut()
                 .filter(|(_, place)| place.get_color() == color)
                 .collect::<Vec<_>>();
-            let sum_of_houses: u8 = color_places
-                .iter()
-                .map(|(houses, _)| {
-                    houses
-                })
-                .sum();
+            let sum_of_houses: u8 = color_places.iter().map(|(houses, _)| houses).sum();
             if sum_of_houses == 0 {
                 for (_, place) in &mut color_places {
                     assert!(place.get_num_houses().unwrap_or(0) == 0);

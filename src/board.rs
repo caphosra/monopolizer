@@ -1,12 +1,21 @@
-use crate::actions::BoardAction;
 use crate::dice_rolling::{DiceResult, DiceRolling};
 use crate::events::EventKind;
 use crate::places::{get_place_list, BoardColor, BoardPlace};
 use crate::player::{Player, PlayerState};
 use crate::strategy::ExpensiveHousesProtectionStrategy;
 
+///
+/// A place id of Jail.
+///
+/// In details, it determines the place where the player is sent when they complete their term.
+///
 const JAIL_POSITION: usize = 10;
 
+///
+/// Represents a game.
+///
+/// Regenerating an instance for each game is needed.
+///
 pub struct MonopolyGame {
     pub players: Vec<Player>,
     pub board: Board,
@@ -24,6 +33,9 @@ macro_rules! game_log {
 }
 
 impl MonopolyGame {
+    ///
+    /// Generates a game.
+    ///
     pub fn new(player_num: u32) -> Self {
         let players = (0..player_num)
             .map(|id| Player::new(id as usize, ExpensiveHousesProtectionStrategy::new()))
@@ -37,38 +49,58 @@ impl MonopolyGame {
         }
     }
 
-    pub fn log(&mut self, log: String) {
-        self.logs.push(log);
-    }
-
-    pub fn get_mut_player(&mut self, id: usize) -> &mut Player {
+    ///
+    /// Gets a player as mutable by id.
+    ///
+    pub fn get_player_mut(&mut self, id: usize) -> &mut Player {
         assert!(id < self.players.len());
 
         &mut self.players[id]
     }
 
+    ///
+    /// Gets a player by id.
+    ///
     pub fn get_player(&self, id: usize) -> &Player {
         assert!(id < self.players.len());
 
         &self.players[id]
     }
 
+    ///
+    /// Gets a number of active players.
+    ///
+    /// In this context, the word "active" means "not being bankrupted".
+    /// So, the player who is in the jail will be counted as an active one.
+    ///
     pub fn count_active_players(&self) -> usize {
-        self.players.iter().filter(|player| match player.state {
-            PlayerState::Bankrupted => false,
-            _ => true
-        }).count()
+        self.players
+            .iter()
+            .filter(|player| match player.state {
+                PlayerState::Bankrupted => false,
+                _ => true,
+            })
+            .count()
     }
 
-    pub fn get_mut_current_player(&mut self) -> &mut Player {
-        self.get_mut_player(self.turn as usize)
-    }
-
+    ///
+    /// Gets a player whose turn it is.
+    ///
     pub fn get_current_player(&self) -> &Player {
         self.get_player(self.turn as usize)
     }
 
-    pub fn exec_action(&mut self, action: BoardAction) {
+    ///
+    /// Gets a player whose turn it is as mutable.
+    ///
+    pub fn get_current_player_mut(&mut self) -> &mut Player {
+        self.get_player_mut(self.turn as usize)
+    }
+
+    ///
+    /// Invokes the event.
+    ///
+    pub fn invoke_event(&mut self, event: EventKind) {
         let turn = self.turn;
         match event {
             EventKind::None(msg) => {
@@ -197,11 +229,15 @@ impl MonopolyGame {
         }
     }
 
+    ///
+    /// Has the player move.
+    ///
     pub fn move_player(&mut self, count: usize) {
-        let current_player = self.get_mut_current_player();
+        let current_player = self.get_current_player_mut();
         let previous_position = current_player.position;
         let previous_position_name = self.board.places[previous_position].get_place_name();
 
+        // If the player passes GO, they receive $200.
         let mut new_position = previous_position + count;
         if new_position >= self.board.places.len() {
             new_position -= self.board.places.len();
@@ -209,7 +245,7 @@ impl MonopolyGame {
             self.invoke_event(EventKind::Reward("passing GO", 200))
         }
 
-        let current_player = self.get_mut_current_player();
+        let current_player = self.get_current_player_mut();
         current_player.position = new_position;
         let new_position_name = self.board.places[new_position].get_place_name();
 
@@ -221,6 +257,11 @@ impl MonopolyGame {
         self.invoke_event(self.board.places[new_position].get_action(self.turn, &self.board));
     }
 
+    ///
+    /// Emulates a turn.
+    ///
+    /// This method takes account of the effect of the same number.
+    ///
     pub fn spend_one_turn(&mut self) {
         if self.count_active_players() > 1 {
             self.spend_one_turn_internal(0);
@@ -240,6 +281,11 @@ impl MonopolyGame {
         }
     }
 
+    ///
+    /// Emulates a turn.
+    ///
+    /// **Do not call this method directly, unless you are in `spend_one_turn`.**
+    ///
     fn spend_one_turn_internal(&mut self, recursion: u32) {
         if recursion == 3 {
             self.invoke_event(EventKind::None("Breaks the speed limit."));
@@ -290,26 +336,30 @@ impl MonopolyGame {
             },
         }
     }
-
-    pub fn get_players_on_place(&self, place_id: usize) -> Vec<&Player> {
-        self.players
-            .iter()
-            .filter(|player| player.position == place_id)
-            .collect()
-    }
 }
 
+///
+/// Represents a board.
+///
+/// This can be seen as a set of places with some useful functions.
+///
 pub struct Board {
     pub places: Vec<Box<dyn BoardPlace>>,
 }
 
 impl Board {
+    ///
+    /// Generates a board.
+    ///
     pub fn new() -> Self {
         Board {
             places: get_place_list(),
         }
     }
 
+    ///
+    /// Gets the sum of the numbers of houses which stand on the designated color.
+    ///
     pub fn get_houses_num_by_color(&self, color: BoardColor) -> Option<u8> {
         let mut num = 0;
         for place in &self.places {
@@ -320,12 +370,18 @@ impl Board {
         Some(num)
     }
 
+    ///
+    /// Gets an iterator of places with the designated color.
+    ///
     pub fn gets_by_color(&self, color: BoardColor) -> impl Iterator<Item = &Box<dyn BoardPlace>> {
         self.places
             .iter()
             .filter(move |place| place.get_color() == color)
     }
 
+    ///
+    /// Gets a mutable iterator of places with the designated color.
+    ///
     pub fn gets_by_color_mut(
         &mut self,
         color: BoardColor,
@@ -335,6 +391,9 @@ impl Board {
             .filter(move |place| place.get_color() == color)
     }
 
+    ///
+    /// Gets a monopolizer of the color if exists.
+    ///
     pub fn get_monopolizer(&self, color: BoardColor) -> Option<usize> {
         let mut owners = self.places.iter().filter_map(|place| {
             if place.get_color() == color {
@@ -354,6 +413,9 @@ impl Board {
         }
     }
 
+    ///
+    /// Gets whether places of the color is monopolized by someone.
+    ///
     pub fn is_monopolized(&self, color: BoardColor) -> bool {
         self.get_monopolizer(color).is_some()
     }
@@ -386,6 +448,9 @@ impl Board {
         }
     }
 
+    ///
+    /// Gets the most expensive
+    ///
     pub fn get_most_expensive(&self, excluding: usize) -> u32 {
         let mut most_expensive = 0u32;
         for place in &self.places {

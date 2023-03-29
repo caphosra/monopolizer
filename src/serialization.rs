@@ -4,6 +4,9 @@ use crate::board::{Board, MonopolyGame};
 use crate::player::{Player, PlayerState};
 use crate::strategy::{ExpensiveHousesProtectionStrategy, PlayerStrategy};
 
+///
+/// Holds information of a game in a serializable format.
+///
 #[derive(Serialize, Deserialize)]
 pub struct GameInfo {
     pub turn: usize,
@@ -11,6 +14,9 @@ pub struct GameInfo {
     pub places: Vec<PlaceInfo>,
 }
 
+///
+/// Holds information of a player in a serializable format.
+///
 #[derive(Serialize, Deserialize)]
 pub struct PlayerInfo {
     pub player_id: usize,
@@ -20,6 +26,9 @@ pub struct PlayerInfo {
     pub position: usize,
 }
 
+///
+/// Holds information of a place in a serializable format.
+///
 #[derive(Serialize, Deserialize)]
 pub struct PlaceInfo {
     pub place_id: usize,
@@ -30,6 +39,9 @@ pub struct PlaceInfo {
 }
 
 impl MonopolyGame {
+    ///
+    /// Reconstructs a game session from JSON.
+    ///
     pub fn from_json(json: &str) -> Self {
         let game_info: GameInfo = serde_json::from_str(json).unwrap();
         let mut game = MonopolyGame::new(game_info.players.len() as u32);
@@ -49,6 +61,9 @@ impl MonopolyGame {
         game
     }
 
+    ///
+    /// Parses information of the game session into a text in JSON.
+    ///
     pub fn to_json(&self) -> String {
         let turn = self.turn;
         let players = self
@@ -69,6 +84,9 @@ impl MonopolyGame {
 }
 
 impl Player {
+    ///
+    /// Retrieves the player data from `PlayerInfo`.
+    ///
     pub fn from_info(info: PlayerInfo, strategy: Box<dyn PlayerStrategy>) -> Self {
         let mut player = Player::new(info.player_id, strategy);
         player.money = info.money;
@@ -90,6 +108,9 @@ impl Player {
         player
     }
 
+    ///
+    /// Turns the player into `PlayerInfo`, which is serializable.
+    ///
     pub fn get_info(&self) -> PlayerInfo {
         let (is_bankrupted, jail_turn) = match self.state {
             PlayerState::None => (false, -1),
@@ -108,6 +129,9 @@ impl Player {
 }
 
 impl Board {
+    ///
+    /// Retrieves the board data from a list of `PlaceInfo`.
+    ///
     pub fn from_infos(infos: Vec<PlaceInfo>) -> Self {
         let mut board = Board::new();
 
@@ -128,6 +152,9 @@ impl Board {
         board
     }
 
+    ///
+    /// Retrieves information of places form the board.
+    ///
     pub fn get_infos(&self) -> Vec<PlaceInfo> {
         let mut infos = Vec::new();
         for place in &self.places {

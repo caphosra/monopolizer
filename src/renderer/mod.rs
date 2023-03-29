@@ -13,6 +13,9 @@ use crate::renderer::logs::get_logs_renderer;
 mod board;
 mod logs;
 
+///
+/// Renders TUIs for showing information of games.
+///
 pub fn start_render_loop(game: &mut MonopolyGame) -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
 

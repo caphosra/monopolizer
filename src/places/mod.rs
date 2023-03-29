@@ -102,6 +102,14 @@ impl dyn BoardPlace {
         let color = self.get_color();
         color != BoardColor::None && color != BoardColor::Railroad && color != BoardColor::Utilities
     }
+
+    pub fn get_rent(&self, board: &Board) -> Option<u32> {
+        match self.get_action(usize::MAX, board) {
+            EventKind::PayToBank(_, money) => Some(money),
+            EventKind::PayToOther(_, _, money) => Some(money),
+            _ => None,
+        }
+    }
 }
 
 pub fn get_place_list() -> Vec<Box<dyn BoardPlace>> {

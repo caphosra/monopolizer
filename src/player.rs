@@ -1,6 +1,9 @@
 use crate::board::Board;
-use crate::strategy::ArrangementStrategy;
+use crate::strategy::PlayerStrategy;
 
+///
+/// Represents the state of a player.
+///
 #[derive(PartialEq, Eq)]
 pub enum PlayerState {
     None,
@@ -8,15 +11,21 @@ pub enum PlayerState {
     InJail(u8),
 }
 
+///
+/// Holds the information of a player.
+///
 pub struct Player {
     pub player_id: usize,
     pub money: u32,
     pub state: PlayerState,
     pub position: usize,
-    strategy: Box<dyn ArrangementStrategy>,
+    strategy: Box<dyn PlayerStrategy>,
 }
 
 impl Player {
+    ///
+    /// Generates a player with designated strategy.
+    ///
     pub fn new(player_id: usize, strategy: Box<dyn PlayerStrategy>) -> Self {
         Player {
             player_id,
@@ -27,6 +36,9 @@ impl Player {
         }
     }
 
+    ///
+    /// Makes the player pay the rent.
+    ///
     pub fn pay(&mut self, board: &mut Board, dollars: u32) -> (Result<(), u32>, Vec<String>) {
         match self.strategy.raise(
             dollars,
@@ -46,6 +58,8 @@ impl Player {
                 )],
             ),
             Err(money) => {
+                assert!(money < dollars);
+
                 self.money = 0;
                 self.state = PlayerState::Bankrupted;
 
@@ -57,6 +71,9 @@ impl Player {
         }
     }
 
+    ///
+    /// Makes the player do investment within the budget.
+    ///
     pub fn invest(&mut self, board: &mut Board) {
         self.strategy.invest(
             board,

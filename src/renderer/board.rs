@@ -9,6 +9,9 @@ use crate::board::Board;
 use crate::places::{BoardColor, BoardPlace};
 use crate::player::{Player, PlayerState};
 
+///
+/// Renders a place.
+///
 pub fn render_place<'a, B: Backend>(
     f: &mut Frame<B>,
     place: &'a Box<dyn BoardPlace>,
@@ -69,6 +72,9 @@ pub fn render_place<'a, B: Backend>(
     f.render_widget(paragraph, area);
 }
 
+///
+/// Gets a renderer for the board.
+///
 pub fn get_board_renderer<'a, B: Backend>(
     turn: usize,
     players: &'a Vec<Player>,
