@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::board::{Board, MonopolyGame};
+use crate::board::{Board, GameSession};
 use crate::player::{Player, PlayerState};
 use crate::strategy::{ExpensiveHousesProtectionStrategy, PlayerStrategy};
 
@@ -38,13 +38,13 @@ pub struct PlaceInfo {
     pub houses: i32,
 }
 
-impl MonopolyGame {
+impl GameSession {
     ///
     /// Reconstructs a game session from JSON.
     ///
     pub fn from_json(json: &str) -> Self {
         let game_info: GameInfo = serde_json::from_str(json).unwrap();
-        let mut game = MonopolyGame::new(game_info.players.len() as u32);
+        let mut game = GameSession::new(game_info.players.len() as u32);
 
         let mut players = Vec::new();
         for player_info in game_info.players {

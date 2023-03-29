@@ -6,7 +6,7 @@ use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
-use crate::board::MonopolyGame;
+use crate::board::GameSession;
 use crate::renderer::board::get_board_renderer;
 use crate::renderer::logs::get_logs_renderer;
 
@@ -16,7 +16,7 @@ mod logs;
 ///
 /// Renders TUIs for showing information of games.
 ///
-pub fn start_render_loop(game: &mut MonopolyGame) -> Result<(), Box<dyn Error>> {
+pub fn start_render_loop(game: &mut GameSession) -> Result<(), Box<dyn Error>> {
     enable_raw_mode()?;
 
     let stdout = stdout();

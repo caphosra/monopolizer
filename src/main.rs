@@ -13,11 +13,11 @@ use std::fs::File;
 use std::io::{stdin, stdout, BufRead, Read, Write};
 
 use crate::appraiser::Appraiser;
-use crate::board::MonopolyGame;
+use crate::board::GameSession;
 use crate::renderer::start_render_loop;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut game: Option<MonopolyGame> = None;
+    let mut game: Option<GameSession> = None;
     loop {
         print!("$ ");
         stdout().flush().unwrap();
@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             (["exit"] | ["q"], _) => break,
             (["init" | "i", player_num], _) => {
                 if let Ok(player_num) = player_num.parse::<u32>() {
-                    game = Some(MonopolyGame::new(player_num));
+                    game = Some(GameSession::new(player_num));
                 }
             }
             (["step" | "s", step], Some(game)) => {
@@ -56,7 +56,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let mut json = String::new();
                 f.read_to_string(&mut json)?;
 
-                game = Some(MonopolyGame::from_json(&json));
+                game = Some(GameSession::from_json(&json));
             }
             (["analyze" | "a", file_name, iteration, turn_num], Some(game)) => {
                 let iterations: i32 = iteration.parse().unwrap();
@@ -67,7 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 let json = game.to_json();
                 for _ in 0..iterations {
-                    let mut game = MonopolyGame::from_json(&json);
+                    let mut game = GameSession::from_json(&json);
                     for i in 0..turn_num {
                         game.spend_one_turn();
 

@@ -16,7 +16,7 @@ const JAIL_POSITION: usize = 10;
 ///
 /// Regenerating an instance for each game is needed.
 ///
-pub struct MonopolyGame {
+pub struct GameSession {
     pub players: Vec<Player>,
     pub board: Board,
     pub turn: usize,
@@ -32,7 +32,7 @@ macro_rules! game_log {
     };
 }
 
-impl MonopolyGame {
+impl GameSession {
     ///
     /// Generates a game.
     ///
@@ -41,7 +41,7 @@ impl MonopolyGame {
             .map(|id| Player::new(id as usize, ExpensiveHousesProtectionStrategy::new()))
             .collect::<Vec<_>>();
 
-        MonopolyGame {
+        GameSession {
             players,
             board: Board::new(),
             turn: 0,
