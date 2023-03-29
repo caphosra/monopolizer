@@ -29,73 +29,65 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let args: Vec<&str> = line.split(" ").collect();
 
-        match args[..] {
-            ["exit"] | ["q"] => break,
-            ["init" | "i", num] => {
-                if let Ok(player_num) = num.parse::<u32>() {
+        match (&args[..], &mut game) {
+            (["exit"] | ["q"], _) => break,
+            (["init" | "i", player_num], _) => {
+                if let Ok(player_num) = player_num.parse::<u32>() {
                     game = Some(MonopolyGame::new(player_num));
                 }
             }
-            ["step" | "s"] => {
-                if let Some(game) = &mut game {
-                    if let Ok(count) = args[1].parse::<i32>() {
-                        for _ in 0..count {
-                            game.spend_one_turn();
-                        }
+            (["step" | "s", step], Some(game)) => {
+                if let Ok(step) = step.parse::<i32>() {
+                    for _ in 0..step {
+                        game.spend_one_turn();
                     }
                 }
             }
-            ["vmode" | "v"] => {
-                if let Some(game) = &mut game {
-                    start_render_loop(game)?;
-                }
+            (["vmode" | "v"], Some(game)) => {
+                start_render_loop(game)?;
             }
-            ["save" | "w", file_name] => {
-                if let Some(game) = &mut game {
-                    let json = game.to_json();
-                    let mut f = File::create(file_name)?;
-                    f.write_all(json.as_bytes())?;
-                }
+            (["save" | "w", file_name], Some(game)) => {
+                let json = game.to_json();
+                let mut f = File::create(file_name)?;
+                f.write_all(json.as_bytes())?;
             }
-            ["load" | "r", file_name] => {
+            (["load" | "r", file_name], _) => {
                 let mut f = File::open(file_name)?;
                 let mut json = String::new();
                 f.read_to_string(&mut json)?;
 
                 game = Some(MonopolyGame::from_json(&json));
             }
-            ["analyze" | "a", file_name, iteration, turn_num] => {
-                if let Some(game) = &mut game {
-                    let iterations: i32 = iteration.parse().unwrap();
-                    let turn_num: i32 = turn_num.parse().unwrap();
+            (["analyze" | "a", file_name, iteration, turn_num], Some(game)) => {
+                let iterations: i32 = iteration.parse().unwrap();
+                let turn_num: i32 = turn_num.parse().unwrap();
 
-                    let mut result = String::new();
-                    result += "turn,player,money,tap\n";
+                let mut result = String::new();
+                result += "turn,player,money,tap\n";
 
-                    let json = game.to_json();
-                    for _ in 0..iterations {
-                        let mut game = MonopolyGame::from_json(&json);
-                        for i in 0..turn_num {
-                            game.spend_one_turn();
+                let json = game.to_json();
+                for _ in 0..iterations {
+                    let mut game = MonopolyGame::from_json(&json);
+                    for i in 0..turn_num {
+                        game.spend_one_turn();
 
-                            for player in &game.players {
-                                let money_infos =
-                                    Appraiser::get_payable_money(player, &game.board).to_string();
-                                let tap = Appraiser::get_tap(player, &game.board);
-                                result += &format!(
-                                    "{},{},{},{}\n",
-                                    i + 1,
-                                    player.player_id,
-                                    money_infos,
-                                    tap
-                                );
-                            }
+                        for player in &game.players {
+                            let money_infos =
+                                Appraiser::get_payable_money(player, &game.board).to_string();
+                            let tap = Appraiser::get_tap(player, &game.board);
+                            result += &format!(
+                                "{},{},{},{}\n",
+                                i + 1,
+                                player.player_id,
+                                money_infos,
+                                tap
+                            );
                         }
                     }
-
-                    let mut f = File::create(file_name)?;
-                    f.write_all(result.as_bytes())?;
                 }
+
+                let mut f = File::create(file_name)?;
+                f.write_all(result.as_bytes())?;
             }
             _ => println!("Unknown command."),
         }
