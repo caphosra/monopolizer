@@ -80,12 +80,12 @@ impl dyn ArrangementStrategy {
 pub struct ExpensiveHousesProtectionStrategy;
 
 impl ExpensiveHousesProtectionStrategy {
-    pub fn new() -> Box<dyn ArrangementStrategy> {
+    pub fn new() -> Box<dyn PlayerStrategy> {
         Box::new(ExpensiveHousesProtectionStrategy {})
     }
 }
 
-impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
+impl PlayerStrategy for ExpensiveHousesProtectionStrategy {
     fn raise_raw(
         &self,
         debt: u32,
@@ -164,12 +164,7 @@ impl ArrangementStrategy for ExpensiveHousesProtectionStrategy {
                 .iter_mut()
                 .filter(|(_, place)| place.get_color() == color)
                 .collect::<Vec<_>>();
-            let mut sum_of_houses: u8 = color_places
-                .iter()
-                .map(|(houses, _)| {
-                    houses
-                })
-                .sum();
+            let mut sum_of_houses: u8 = color_places.iter().map(|(houses, _)| houses).sum();
 
             while sum_of_houses > 0 {
                 color_places.sort_by(|(houses1, _), (houses2, _)| houses2.cmp(houses1));

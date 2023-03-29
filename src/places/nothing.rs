@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::places::{BoardAction, BoardColor, BoardPlace};
+use crate::places::{BoardColor, BoardPlace, EventKind};
 
 pub struct Nothing {
     id: usize,
@@ -19,8 +19,8 @@ impl BoardPlace for Nothing {
         self.name
     }
 
-    fn get_action<'a>(&self, _: usize, _: &Board) -> BoardAction<'a> {
-        BoardAction::None(self.name)
+    fn get_action<'a>(&self, _: usize, _: &Board) -> EventKind<'a> {
+        EventKind::None(self.name)
     }
 
     fn get_owner(&self) -> Option<usize> {

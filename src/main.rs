@@ -1,7 +1,7 @@
-pub mod actions;
 pub mod appraiser;
 pub mod board;
 pub mod dice_rolling;
+pub mod events;
 pub mod places;
 pub mod player;
 pub mod renderer;

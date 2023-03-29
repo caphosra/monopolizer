@@ -1,9 +1,12 @@
-use crate::{board::Board, player::Player, actions::BoardAction, places::BoardColor};
+use crate::board::Board;
+use crate::events::EventKind;
+use crate::places::BoardColor;
+use crate::player::Player;
 
 pub struct Appraiser;
 
 impl Appraiser {
-    pub fn appraise(player: &Player, board: &Board) -> u32 {
+    pub fn get_payable_money(player: &Player, board: &Board) -> u32 {
         let mut price = player.money;
 
         price += board
@@ -28,15 +31,14 @@ impl Appraiser {
             if place.get_owner() == Some(player.player_id) {
                 if place.get_color() != BoardColor::Utilities {
                     match place.get_action(usize::MAX, board) {
-                        BoardAction::PayToOther(_, player_id, money) => {
+                        EventKind::PayToOther(_, player_id, money) => {
                             assert_eq!(player_id, player.player_id);
 
                             tap += money;
                         }
                         _ => {}
                     };
-                }
-                else {
+                } else {
                     num_of_utilities += 1;
                 }
             }

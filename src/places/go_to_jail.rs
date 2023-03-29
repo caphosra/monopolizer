@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::places::{BoardAction, BoardColor, BoardPlace};
+use crate::places::{BoardColor, BoardPlace, EventKind};
 
 pub struct GoToJail {
     id: usize,
@@ -18,8 +18,8 @@ impl BoardPlace for GoToJail {
         "Go to Jail"
     }
 
-    fn get_action<'a>(&self, _: usize, _: &Board) -> BoardAction<'a> {
-        BoardAction::GetJailed
+    fn get_action<'a>(&self, _: usize, _: &Board) -> EventKind<'a> {
+        EventKind::GetJailed
     }
 
     fn get_owner(&self) -> Option<usize> {

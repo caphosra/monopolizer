@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::places::{BoardAction, BoardColor, BoardPlace};
+use crate::places::{BoardColor, BoardPlace, EventKind};
 
 pub struct IncomeTax {
     id: usize,
@@ -18,8 +18,8 @@ impl BoardPlace for IncomeTax {
         "Income Tax"
     }
 
-    fn get_action<'a>(&self, _: usize, _: &Board) -> BoardAction<'a> {
-        BoardAction::PayToBank("Income Tax", 200)
+    fn get_action<'a>(&self, _: usize, _: &Board) -> EventKind<'a> {
+        EventKind::PayToBank("Income Tax", 200)
     }
 
     fn get_owner(&self) -> Option<usize> {

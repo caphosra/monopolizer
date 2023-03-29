@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::board::{Board, MonopolyGame};
 use crate::player::{Player, PlayerState};
-use crate::strategy::{ArrangementStrategy, ExpensiveHousesProtectionStrategy};
+use crate::strategy::{ExpensiveHousesProtectionStrategy, PlayerStrategy};
 
 #[derive(Serialize, Deserialize)]
 pub struct GameInfo {
@@ -16,7 +16,7 @@ pub struct PlayerInfo {
     pub player_id: usize,
     pub money: u32,
     pub is_bankrupted: bool,
-    pub jail_turn: i32,
+    pub jail_turn: i8,
     pub position: usize,
 }
 
@@ -69,7 +69,7 @@ impl MonopolyGame {
 }
 
 impl Player {
-    pub fn from_info(info: PlayerInfo, strategy: Box<dyn ArrangementStrategy>) -> Self {
+    pub fn from_info(info: PlayerInfo, strategy: Box<dyn PlayerStrategy>) -> Self {
         let mut player = Player::new(info.player_id, strategy);
         player.money = info.money;
 
@@ -79,7 +79,7 @@ impl Player {
             assert_eq!(info.jail_turn, -1);
         } else {
             if info.jail_turn >= 0 {
-                player.state = PlayerState::InJail(info.jail_turn as u32);
+                player.state = PlayerState::InJail(info.jail_turn as u8);
             } else {
                 player.state = PlayerState::None;
             }
@@ -94,7 +94,7 @@ impl Player {
         let (is_bankrupted, jail_turn) = match self.state {
             PlayerState::None => (false, -1),
             PlayerState::Bankrupted => (true, -1),
-            PlayerState::InJail(turn) => (false, turn as i32),
+            PlayerState::InJail(turn) => (false, turn as i8),
         };
 
         PlayerInfo {

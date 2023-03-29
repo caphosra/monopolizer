@@ -1,5 +1,5 @@
-use crate::actions::BoardAction;
 use crate::board::Board;
+use crate::events::EventKind;
 use crate::places::{BoardColor, BoardPlace};
 
 pub struct Estate {
@@ -34,20 +34,20 @@ impl BoardPlace for Estate {
         self.name
     }
 
-    fn get_action<'a>(&self, turn: usize, board: &Board) -> BoardAction<'a> {
+    fn get_action<'a>(&self, turn: usize, board: &Board) -> EventKind<'a> {
         if let Some(owner) = self.owner {
             if owner == turn {
-                BoardAction::None("Lands their place.")
+                EventKind::None("Lands their place.")
             } else {
                 if self.mortgaged {
-                    BoardAction::None("The place is mortgaged.")
+                    EventKind::None("The place is mortgaged.")
                 } else {
                     let rent = self.get_rent(board);
-                    BoardAction::PayToOther(self.get_place_name(), owner, rent)
+                    EventKind::PayToOther(self.get_place_name(), owner, rent)
                 }
             }
         } else {
-            BoardAction::GivePlace(self.id, self.price)
+            EventKind::GivePlace(self.id, self.price)
         }
     }
 

@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::places::{BoardAction, BoardColor, BoardPlace};
+use crate::places::{BoardColor, BoardPlace, EventKind};
 
 pub struct Chance {
     id: usize,
@@ -18,8 +18,8 @@ impl BoardPlace for Chance {
         "Chance"
     }
 
-    fn get_action<'a>(&self, _: usize, _: &Board) -> BoardAction<'a> {
-        BoardAction::None("Lands Chance.")
+    fn get_action<'a>(&self, _: usize, _: &Board) -> EventKind<'a> {
+        EventKind::None("Lands Chance.")
     }
 
     fn get_owner(&self) -> Option<usize> {

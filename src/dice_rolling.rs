@@ -6,7 +6,7 @@ pub enum DiceResult {
 }
 
 impl DiceResult {
-    pub fn get_num(self) -> u32 {
+    pub fn unwrap(self) -> u32 {
         match self {
             DiceResult::Same(result) => result,
             DiceResult::Different(result) => result,

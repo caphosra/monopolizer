@@ -10,8 +10,8 @@ pub mod utilities;
 
 use std::fmt::{Display, Error, Formatter};
 
-use crate::actions::BoardAction;
 use crate::board::Board;
+use crate::events::EventKind;
 use crate::places::chance::Chance;
 use crate::places::community_chest::CommunityChest;
 use crate::places::estate::Estate;
@@ -77,7 +77,7 @@ pub trait BoardPlace {
     fn info(&self) -> String;
     fn get_id(&self) -> usize;
     fn get_place_name(&self) -> &'static str;
-    fn get_action<'a>(&self, turn: usize, board: &Board) -> BoardAction<'a>;
+    fn get_action<'a>(&self, turn: usize, board: &Board) -> EventKind<'a>;
     fn get_owner(&self) -> Option<usize>;
     fn set_owner(&mut self, owner: Option<usize>);
     fn get_num_houses(&self) -> Option<u8>;

@@ -5,7 +5,7 @@ use crate::strategy::ArrangementStrategy;
 pub enum PlayerState {
     None,
     Bankrupted,
-    InJail(u32),
+    InJail(u8),
 }
 
 pub struct Player {
@@ -17,7 +17,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(player_id: usize, strategy: Box<dyn ArrangementStrategy>) -> Self {
+    pub fn new(player_id: usize, strategy: Box<dyn PlayerStrategy>) -> Self {
         Player {
             player_id,
             money: 1500,
