@@ -1,3 +1,4 @@
+use crate::appraiser::Appraiser;
 use crate::dice_rolling::{DiceResult, DiceRolling};
 use crate::events::EventKind;
 use crate::places::{get_place_list, BoardColor, BoardPlace};
@@ -10,6 +11,41 @@ use crate::strategy::ExpensiveHousesProtectionStrategy;
 /// In details, it determines the place where the player is sent when they complete their term.
 ///
 const JAIL_POSITION: usize = 10;
+
+///
+/// A fragment of the summary of the game.
+///
+/// It consists of status of one player.
+///
+pub struct GameSummaryFragment {
+    pub turn_count: usize,
+    pub id: usize,
+    pub money: u32,
+    pub tap: u32,
+}
+
+impl ToString for GameSummaryFragment {
+    fn to_string(&self) -> String {
+        format!(
+            "{},{},{},{}",
+            self.turn_count, self.id, self.money, self.tap
+        )
+    }
+}
+
+impl GameSummaryFragment {
+    ///
+    /// Generates a fragment.
+    ///
+    pub fn new(turn_count: usize, id: usize, money: u32, tap: u32) -> Self {
+        GameSummaryFragment {
+            turn_count,
+            id,
+            money,
+            tap,
+        }
+    }
+}
 
 ///
 /// Represents a game.
@@ -335,6 +371,17 @@ impl GameSession {
                 }
             },
         }
+    }
+
+    pub fn export_summaries(&self, turn_count: usize) -> Vec<GameSummaryFragment> {
+        self.players
+            .iter()
+            .map(|player| {
+                let money = Appraiser::get_payable_money(player, &self.board);
+                let tap = Appraiser::get_tap(player, &self.board);
+                GameSummaryFragment::new(turn_count, player.player_id, money, tap)
+            })
+            .collect()
     }
 }
 

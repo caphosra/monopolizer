@@ -12,7 +12,6 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{stdin, stdout, BufRead, Read, Write};
 
-use crate::appraiser::Appraiser;
 use crate::board::GameSession;
 use crate::renderer::start_render_loop;
 
@@ -60,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
             (["analyze" | "a", file_name, iteration, turn_num], Some(game)) => {
                 let iterations: i32 = iteration.parse().unwrap();
-                let turn_num: i32 = turn_num.parse().unwrap();
+                let turn_num: usize = turn_num.parse().unwrap();
 
                 let mut result = String::new();
                 result += "turn,player,money,tap\n";
@@ -71,18 +70,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                     for i in 0..turn_num {
                         game.spend_one_turn();
 
-                        for player in &game.players {
-                            let money_infos =
-                                Appraiser::get_payable_money(player, &game.board).to_string();
-                            let tap = Appraiser::get_tap(player, &game.board);
-                            result += &format!(
-                                "{},{},{},{}\n",
-                                i + 1,
-                                player.player_id,
-                                money_infos,
-                                tap
-                            );
-                        }
+                        let summaries = game.export_summaries(i);
+                        let summaries = summaries
+                            .iter()
+                            .map(|summary| summary.to_string())
+                            .collect::<Vec<_>>()
+                            .join("\n");
+
+                        result += &summaries;
+                        result += "\n";
                     }
                 }
 
