@@ -4,10 +4,10 @@ use tui::style::{Color, Style};
 use tui::widgets::{Block, Borders, Paragraph};
 use tui::Frame;
 
-use crate::appraiser::Appraiser;
-use crate::board::Board;
-use crate::places::{BoardColor, BoardPlace};
-use crate::player::{Player, PlayerState};
+use mplzlib::appraiser::Appraiser;
+use mplzlib::board::Board;
+use mplzlib::places::{BoardColor, BoardPlace};
+use mplzlib::player::{Player, PlayerState};
 
 ///
 /// Renders a place.

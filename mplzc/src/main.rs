@@ -1,20 +1,11 @@
-pub mod appraiser;
-pub mod board;
-pub mod command;
-pub mod dice_rolling;
-pub mod events;
-pub mod places;
-pub mod player;
 pub mod renderer;
-pub mod serialization;
-pub mod strategy;
 
 use std::error::Error;
 use std::io::{stdin, stdout, BufRead, Write};
 
-use crate::board::GameSession;
-use crate::command::{AnalysisCommandArg, GameCommand};
 use crate::renderer::start_render_loop;
+use mplzlib::board::GameSession;
+use mplzlib::command::{AnalysisCommandArg, GameCommand};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut game: Option<GameSession> = None;

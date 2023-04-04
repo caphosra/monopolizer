@@ -3,10 +3,10 @@ use std::io::stdout;
 
 use crossterm::event::{read, Event, KeyCode, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use mplzlib::board::GameSession;
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
-use crate::board::GameSession;
 use crate::renderer::board::get_board_renderer;
 use crate::renderer::logs::get_logs_renderer;
 
