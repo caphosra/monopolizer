@@ -60,7 +60,7 @@ impl BoardPlace for CommunityChest {
 }
 
 impl CommunityChest {
-    pub fn new(id: usize) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(CommunityChest { id })
     }
 }

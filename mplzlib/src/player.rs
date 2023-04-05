@@ -19,14 +19,14 @@ pub struct Player {
     pub money: u32,
     pub state: PlayerState,
     pub position: usize,
-    strategy: Box<dyn PlayerStrategy>,
+    strategy: Box<dyn PlayerStrategy + Send>,
 }
 
 impl Player {
     ///
     /// Generates a player with designated strategy.
     ///
-    pub fn new(player_id: usize, strategy: Box<dyn PlayerStrategy>) -> Self {
+    pub fn new(player_id: usize, strategy: Box<dyn PlayerStrategy + Send>) -> Self {
         Player {
             player_id,
             money: 1500,

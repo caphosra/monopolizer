@@ -86,7 +86,7 @@ impl BoardPlace for Utilities {
 }
 
 impl Utilities {
-    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
         Box::new(Utilities {
             id,
             name,

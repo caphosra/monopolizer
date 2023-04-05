@@ -97,7 +97,7 @@ impl Estate {
         price: u32,
         house_price: u32,
         rent: Vec<u32>,
-    ) -> Box<dyn BoardPlace> {
+    ) -> Box<dyn BoardPlace + Send> {
         assert_eq!(rent.len(), 7);
 
         Box::new(Estate {

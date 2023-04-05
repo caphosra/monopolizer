@@ -61,7 +61,7 @@ impl BoardPlace for Nothing {
 }
 
 impl Nothing {
-    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
         Box::new(Nothing { id, name })
     }
 }

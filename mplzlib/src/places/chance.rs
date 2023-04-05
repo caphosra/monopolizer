@@ -60,7 +60,7 @@ impl BoardPlace for Chance {
 }
 
 impl Chance {
-    pub fn new(id: usize) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(Chance { id })
     }
 }

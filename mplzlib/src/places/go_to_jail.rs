@@ -60,7 +60,7 @@ impl BoardPlace for GoToJail {
 }
 
 impl GoToJail {
-    pub fn new(id: usize) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(GoToJail { id })
     }
 }

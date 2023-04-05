@@ -14,7 +14,7 @@ use mplzlib::player::{Player, PlayerState};
 ///
 pub fn render_place<'a, B: Backend>(
     f: &mut Frame<B>,
-    place: &'a Box<dyn BoardPlace>,
+    place: &'a Box<dyn BoardPlace + Send>,
     players: &'a Vec<Player>,
     area: Rect,
 ) {

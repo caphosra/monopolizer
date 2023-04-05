@@ -391,7 +391,7 @@ impl GameSession {
 /// This can be seen as a set of places with some useful functions.
 ///
 pub struct Board {
-    pub places: Vec<Box<dyn BoardPlace>>,
+    pub places: Vec<Box<dyn BoardPlace + Send>>,
 }
 
 impl Board {
@@ -420,7 +420,10 @@ impl Board {
     ///
     /// Gets an iterator of places with the designated color.
     ///
-    pub fn gets_by_color(&self, color: BoardColor) -> impl Iterator<Item = &Box<dyn BoardPlace>> {
+    pub fn gets_by_color(
+        &self,
+        color: BoardColor,
+    ) -> impl Iterator<Item = &Box<dyn BoardPlace + Send>> {
         self.places
             .iter()
             .filter(move |place| place.get_color() == color)
@@ -432,7 +435,7 @@ impl Board {
     pub fn gets_by_color_mut(
         &mut self,
         color: BoardColor,
-    ) -> impl Iterator<Item = &mut Box<dyn BoardPlace>> {
+    ) -> impl Iterator<Item = &mut Box<dyn BoardPlace + Send>> {
         self.places
             .iter_mut()
             .filter(move |place| place.get_color() == color)

@@ -42,6 +42,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 GameCommand::Load(file_name, game).execute()?;
             }
             (["analyze" | "a", file_name, iteration, simulation_turn], Some(game)) => {
+                let file_name = file_name.to_string();
                 let iteration: i32 = iteration.parse().unwrap();
                 let simulation_turn: usize = simulation_turn.parse().unwrap();
 

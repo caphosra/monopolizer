@@ -60,7 +60,7 @@ impl BoardPlace for LuxuryTax {
 }
 
 impl LuxuryTax {
-    pub fn new(id: usize) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(LuxuryTax { id })
     }
 }

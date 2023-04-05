@@ -60,7 +60,7 @@ impl BoardPlace for IncomeTax {
 }
 
 impl IncomeTax {
-    pub fn new(id: usize) -> Box<dyn BoardPlace> {
+    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(IncomeTax { id })
     }
 }

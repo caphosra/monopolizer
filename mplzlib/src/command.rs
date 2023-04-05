@@ -2,15 +2,24 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{Read, Write};
 
+use serde::{Deserialize, Serialize};
+
 use crate::board::GameSession;
 
 ///
 /// Holds arguments of analysis command.
 ///
-pub struct AnalysisCommandArg<'a> {
-    pub file_name: &'a str,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AnalysisCommandArg {
+    pub file_name: String,
     pub iteration: i32,
     pub simulation_turn: usize,
+}
+
+impl AnalysisCommandArg {
+    pub fn to_string(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
+    }
 }
 
 ///
@@ -21,7 +30,7 @@ pub enum GameCommand<'a> {
     Step(u32, &'a mut GameSession),
     Save(&'a str, &'a GameSession),
     Load(&'a str, &'a mut Option<GameSession>),
-    Analyze(AnalysisCommandArg<'a>, &'a GameSession),
+    Analyze(AnalysisCommandArg, &'a GameSession),
 }
 
 impl<'a> GameCommand<'a> {
@@ -72,7 +81,7 @@ impl<'a> GameCommand<'a> {
                     }
                 }
 
-                let mut f = File::create(arg.file_name)?;
+                let mut f = File::create(&arg.file_name)?;
                 f.write_all(result.as_bytes())?;
             }
         }

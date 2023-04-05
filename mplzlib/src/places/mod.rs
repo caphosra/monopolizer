@@ -89,7 +89,7 @@ pub trait BoardPlace {
     fn set_mortgaged(&mut self, mortgaged: bool) -> u32;
 }
 
-impl dyn BoardPlace {
+impl dyn BoardPlace + Send {
     pub fn get_return_cost(&self) -> u32 {
         ((self.get_price() / 2) as f32 * 1.1) as u32
     }
@@ -112,7 +112,7 @@ impl dyn BoardPlace {
     }
 }
 
-pub fn get_place_list() -> Vec<Box<dyn BoardPlace>> {
+pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
     vec![
         Nothing::new(0, "Go"),
         Estate::new(

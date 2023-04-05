@@ -65,7 +65,7 @@ macro_rules! invest_or_quit {
     };
 }
 
-impl dyn PlayerStrategy {
+impl dyn PlayerStrategy + Send {
     ///
     /// Raises money to pay off the debt.
     ///
@@ -107,7 +107,7 @@ impl dyn PlayerStrategy {
 pub struct ExpensiveHousesProtectionStrategy;
 
 impl ExpensiveHousesProtectionStrategy {
-    pub fn new() -> Box<dyn PlayerStrategy> {
+    pub fn new() -> Box<dyn PlayerStrategy + Send> {
         Box::new(ExpensiveHousesProtectionStrategy {})
     }
 }

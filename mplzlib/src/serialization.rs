@@ -87,7 +87,7 @@ impl Player {
     ///
     /// Retrieves the player data from `PlayerInfo`.
     ///
-    pub fn from_info(info: PlayerInfo, strategy: Box<dyn PlayerStrategy>) -> Self {
+    pub fn from_info(info: PlayerInfo, strategy: Box<dyn PlayerStrategy + Send>) -> Self {
         let mut player = Player::new(info.player_id, strategy);
         player.money = info.money;
 
