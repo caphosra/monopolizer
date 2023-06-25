@@ -39,9 +39,9 @@ pub struct PlaceInfo {
     pub houses: i32,
 }
 
-impl PlayerInfo {
-    pub fn from_data(data: (i64, i64, String, i64, i64)) -> Self {
-        let (player_id, money, is_bankrupted, jail_turn, position) = data;
+impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
+    fn into(self) -> PlayerInfo {
+        let (player_id, money, is_bankrupted, jail_turn, position) = self;
 
         PlayerInfo {
             player_id: player_id as usize,
@@ -97,8 +97,14 @@ impl GameSession {
         serde_json::to_string_pretty(&game_info).unwrap()
     }
 
+    ///
+    /// Imports information of a game from a .xlsx file.
+    ///
     pub fn from_excel(file_name: &str) -> Self {
         let mut workbook: Xlsx<_> = open_workbook(file_name).unwrap();
+
+        let turn = workbook.worksheet_range("Turn").unwrap().unwrap();
+        let turn = turn.get_value((0, 1)).unwrap().as_i64().unwrap() as usize;
 
         let players_sheet = workbook.worksheet_range("Players").unwrap().unwrap();
         let players_sheet = RangeDeserializerBuilder::new()
@@ -107,22 +113,19 @@ impl GameSession {
         let players: Vec<Player> = players_sheet
             .into_iter()
             .map(|player| {
-                let player = player.unwrap();
-                let player_info = PlayerInfo::from_data(player);
+                let player_info: (i64, i64, String, i64, i64) = player.unwrap();
 
-                Player::from_info(player_info, ExpensiveHousesProtectionStrategy::new())
+                Player::from_info(player_info.into(), ExpensiveHousesProtectionStrategy::new())
             })
             .collect();
 
         let places_sheet = workbook.worksheet_range("Places").unwrap().unwrap();
-
-        let turn = workbook.worksheet_range("Turn").unwrap().unwrap();
-        let turn: i64 = turn.get_value((0, 1)).unwrap().as_i64().unwrap();
+        let board = Board::from_rows(places_sheet);
 
         let mut game = GameSession::new(players.len() as u32);
         game.players = players;
-        game.turn = turn as usize;
-        game.board = Board::from_rows(places_sheet);
+        game.turn = turn;
+        game.board = board;
 
         game
     }
