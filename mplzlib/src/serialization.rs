@@ -1,3 +1,4 @@
+use calamine::{open_workbook, DataType, Range, RangeDeserializerBuilder, Reader, Xlsx};
 use serde::{Deserialize, Serialize};
 
 use crate::board::{Board, GameSession};
@@ -36,6 +37,20 @@ pub struct PlaceInfo {
     pub owner: i32,
     pub is_mortgaged: bool,
     pub houses: i32,
+}
+
+impl PlayerInfo {
+    pub fn from_data(data: (i64, i64, String, i64, i64)) -> Self {
+        let (player_id, money, is_bankrupted, jail_turn, position) = data;
+
+        PlayerInfo {
+            player_id: player_id as usize,
+            money: money as u32,
+            is_bankrupted: is_bankrupted == "yes",
+            jail_turn: jail_turn as i8,
+            position: position as usize,
+        }
+    }
 }
 
 impl GameSession {
@@ -80,6 +95,36 @@ impl GameSession {
         };
 
         serde_json::to_string_pretty(&game_info).unwrap()
+    }
+
+    pub fn from_excel(file_name: &str) -> Self {
+        let mut workbook: Xlsx<_> = open_workbook(file_name).unwrap();
+
+        let players_sheet = workbook.worksheet_range("Players").unwrap().unwrap();
+        let players_sheet = RangeDeserializerBuilder::new()
+            .from_range(&players_sheet)
+            .unwrap();
+        let players: Vec<Player> = players_sheet
+            .into_iter()
+            .map(|player| {
+                let player = player.unwrap();
+                let player_info = PlayerInfo::from_data(player);
+
+                Player::from_info(player_info, ExpensiveHousesProtectionStrategy::new())
+            })
+            .collect();
+
+        let places_sheet = workbook.worksheet_range("Places").unwrap().unwrap();
+
+        let turn = workbook.worksheet_range("Turn").unwrap().unwrap();
+        let turn: i64 = turn.get_value((0, 1)).unwrap().as_i64().unwrap();
+
+        let mut game = GameSession::new(players.len() as u32);
+        game.players = players;
+        game.turn = turn as usize;
+        game.board = Board::from_rows(places_sheet);
+
+        game
     }
 }
 
@@ -150,6 +195,27 @@ impl Board {
         }
 
         board
+    }
+
+    pub fn from_rows(rows: Range<DataType>) -> Self {
+        let places_data = RangeDeserializerBuilder::new().from_range(&rows).unwrap();
+        let places = places_data
+            .into_iter()
+            .map(|place| {
+                let (id, name, owner, is_mortgaged, houses): (i64, String, i64, String, i64) =
+                    place.unwrap();
+
+                PlaceInfo {
+                    place_id: id as usize,
+                    place_name: name,
+                    owner: owner as i32,
+                    is_mortgaged: is_mortgaged == "yes",
+                    houses: houses as i32,
+                }
+            })
+            .collect();
+
+        Board::from_infos(places)
     }
 
     ///
