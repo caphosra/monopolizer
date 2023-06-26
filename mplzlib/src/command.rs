@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
@@ -53,11 +54,22 @@ impl<'a> GameCommand<'a> {
                 f.write_all(json.as_bytes())?;
             }
             Self::Load(file_name, session) => {
-                let mut f = File::open(file_name)?;
-                let mut json = String::new();
-                f.read_to_string(&mut json)?;
+                let extension = Path::new(&file_name).extension().unwrap().to_str().unwrap();
+                match extension {
+                    "json" => {
+                        let mut f = File::open(file_name)?;
+                        let mut json = String::new();
+                        f.read_to_string(&mut json)?;
 
-                **session = Some(GameSession::from_json(&json));
+                        **session = Some(GameSession::from_json(&json));
+                    }
+                    "xlsx" => {
+                        **session = Some(GameSession::from_excel(file_name));
+                    }
+                    ext => {
+                        println!("Files with \".{}\" are not supported.", ext)
+                    }
+                }
             }
             Self::Analyze(arg, session) => {
                 let mut result = String::new();
