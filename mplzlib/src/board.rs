@@ -330,7 +330,7 @@ impl GameSession {
         }
 
         let turn = self.turn;
-        let mut current_player = self.get_current_player_mut();
+        let current_player = self.get_current_player_mut();
 
         assert_eq!(turn, current_player.player_id);
 
