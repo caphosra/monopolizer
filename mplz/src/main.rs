@@ -1,7 +1,8 @@
 use std::sync::Mutex;
 
-use actix_web::web::Json;
-use actix_web::{post, App, HttpResponse, HttpServer, Responder};
+use actix_web::web::{Json, Redirect};
+use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
+use actix_files::Files;
 use once_cell::sync::Lazy;
 
 use mplzlib::board::GameSession;
@@ -10,6 +11,11 @@ use mplzlib::command::{AnalysisCommandArg, GameCommand};
 const MONOPOLY_PORT: u16 = 5391;
 
 static GLOBAL_GAME_SESSION: Lazy<Mutex<Option<GameSession>>> = Lazy::new(|| Mutex::new(None));
+
+#[get("/")]
+async fn root() -> impl Responder {
+    Redirect::to("/index.html")
+}
 
 #[post("/init")]
 async fn init(player_num: String) -> impl Responder {
@@ -113,11 +119,13 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .service(root)
             .service(init)
             .service(step)
             .service(save)
             .service(load)
             .service(analyze)
+            .service(Files::new("/", "./web/build/").prefer_utf8(true).show_files_listing())
     })
     .bind(("127.0.0.1", MONOPOLY_PORT))?
     .run()
