@@ -1,4 +1,4 @@
-export interface IPlayer {
+export interface IPlayerInfo {
     player_id: number;
     money: number;
     is_bankrupted: boolean;
@@ -6,15 +6,15 @@ export interface IPlayer {
     position: number;
 }
 
-export interface IPlace {
+export interface IPlaceInfo {
     place_id: number;
     owner: number | undefined;
     is_mortgaged: boolean;
     houses: number | undefined;
 }
 
-export interface IGame {
+export interface IGameInfo {
     turn: number;
-    players: IPlayer[];
-    places: IPlace[];
+    players: IPlayerInfo[];
+    places: IPlaceInfo[];
 }
