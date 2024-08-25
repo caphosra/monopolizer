@@ -23,7 +23,7 @@ pub struct PlayerInfo {
     pub player_id: usize,
     pub money: u32,
     pub is_bankrupted: bool,
-    pub jail_turn: i8,
+    pub jail_turn: Option<u8>,
     pub position: usize,
 }
 
@@ -33,10 +33,9 @@ pub struct PlayerInfo {
 #[derive(Serialize, Deserialize)]
 pub struct PlaceInfo {
     pub place_id: usize,
-    pub place_name: String,
-    pub owner: i32,
+    pub owner: Option<usize>,
     pub is_mortgaged: bool,
-    pub houses: i32,
+    pub houses: Option<u8>,
 }
 
 impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
@@ -47,7 +46,11 @@ impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
             player_id: player_id as usize,
             money: money as u32,
             is_bankrupted: is_bankrupted == "yes",
-            jail_turn: jail_turn as i8,
+            jail_turn: if jail_turn >= 0 {
+                Some(jail_turn as u8)
+            } else {
+                None
+            },
             position: position as usize,
         }
     }
@@ -142,13 +145,14 @@ impl Player {
         if info.is_bankrupted {
             player.state = PlayerState::Bankrupted;
 
-            assert_eq!(info.jail_turn, -1);
+            assert_eq!(info.jail_turn, None);
         } else {
-            if info.jail_turn >= 0 {
-                player.state = PlayerState::InJail(info.jail_turn as u8);
-            } else {
-                player.state = PlayerState::None;
+            player.state = if let Some(jail_turn) =  info.jail_turn {
+                PlayerState::InJail(jail_turn)
             }
+            else {
+                PlayerState::None
+            };
         }
 
         player.position = info.position;
@@ -161,9 +165,9 @@ impl Player {
     ///
     pub fn get_info(&self) -> PlayerInfo {
         let (is_bankrupted, jail_turn) = match self.state {
-            PlayerState::None => (false, -1),
-            PlayerState::Bankrupted => (true, -1),
-            PlayerState::InJail(turn) => (false, turn as i8),
+            PlayerState::None => (false, None),
+            PlayerState::Bankrupted => (true, None),
+            PlayerState::InJail(turn) => (false, Some(turn)),
         };
 
         PlayerInfo {
@@ -186,13 +190,11 @@ impl Board {
         for info in infos {
             let place = &mut board.places[info.place_id];
 
-            assert_eq!(place.get_place_name(), &info.place_name);
-
-            if info.owner >= 0 {
-                place.set_owner(Some(info.owner as usize));
+            if let Some(owner) = info.owner {
+                place.set_owner(Some(owner));
             }
-            if info.houses >= 0 {
-                place.set_num_houses(info.houses as u8);
+            if let Some(houses) = info.houses {
+                place.set_num_houses(houses);
             }
             place.set_mortgaged(info.is_mortgaged);
         }
@@ -205,15 +207,14 @@ impl Board {
         let places = places_data
             .into_iter()
             .map(|place| {
-                let (id, name, owner, is_mortgaged, houses): (i64, String, i64, String, i64) =
+                let (id, _, owner, is_mortgaged, houses): (i64, String, i64, String, i64) =
                     place.unwrap();
 
                 PlaceInfo {
                     place_id: id as usize,
-                    place_name: name,
-                    owner: owner as i32,
+                    owner: if owner >= 0 { Some(owner as usize) } else { None },
                     is_mortgaged: is_mortgaged == "yes",
-                    houses: houses as i32,
+                    houses: if houses >= 0 { Some(houses as u8) } else { None },
                 }
             })
             .collect();
@@ -230,10 +231,9 @@ impl Board {
             if place.is_property() {
                 infos.push(PlaceInfo {
                     place_id: place.get_id(),
-                    place_name: place.get_place_name().to_string(),
-                    owner: place.get_owner().map_or(-1, |owner| owner as i32),
+                    owner: place.get_owner(),
                     is_mortgaged: place.is_mortgaged(),
-                    houses: place.get_num_houses().map_or(-1, |owner| owner as i32),
+                    houses: place.get_num_houses(),
                 });
             }
         }
