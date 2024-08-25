@@ -842,7 +842,8 @@ dependencies = [
  "actix-files",
  "actix-web",
  "mplzlib",
- "once_cell",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

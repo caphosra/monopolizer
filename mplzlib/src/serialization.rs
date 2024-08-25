@@ -58,14 +58,13 @@ impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
 
 impl GameSession {
     ///
-    /// Reconstructs a game session from JSON.
+    /// Reconstructs a game session from GameInfo.
     ///
-    pub fn from_json(json: &str) -> Self {
-        let game_info: GameInfo = serde_json::from_str(json).unwrap();
+    pub fn from_info(game_info: &GameInfo) -> Self {
         let mut game = GameSession::new(game_info.players.len() as u32);
 
         let mut players = Vec::new();
-        for player_info in game_info.players {
+        for player_info in &game_info.players {
             players.push(Player::from_info(
                 player_info,
                 ExpensiveHousesProtectionStrategy::new(),
@@ -74,9 +73,17 @@ impl GameSession {
         game.players = players;
 
         game.turn = game_info.turn;
-        game.board = Board::from_infos(game_info.places);
+        game.board = Board::from_infos(&game_info.places);
 
         game
+    }
+
+    ///
+    /// Reconstructs a game session from JSON.
+    ///
+    pub fn from_json(json: &str) -> Self {
+        let game_info: GameInfo = serde_json::from_str(json).unwrap();
+        GameSession::from_info(&game_info)
     }
 
     ///
@@ -118,7 +125,7 @@ impl GameSession {
             .map(|player| {
                 let player_info: (i64, i64, String, i64, i64) = player.unwrap();
 
-                Player::from_info(player_info.into(), ExpensiveHousesProtectionStrategy::new())
+                Player::from_info(&(player_info.into()), ExpensiveHousesProtectionStrategy::new())
             })
             .collect();
 
@@ -138,7 +145,7 @@ impl Player {
     ///
     /// Retrieves the player data from `PlayerInfo`.
     ///
-    pub fn from_info(info: PlayerInfo, strategy: Box<dyn PlayerStrategy + Send>) -> Self {
+    pub fn from_info(info: &PlayerInfo, strategy: Box<dyn PlayerStrategy + Send>) -> Self {
         let mut player = Player::new(info.player_id, strategy);
         player.money = info.money;
 
@@ -184,7 +191,7 @@ impl Board {
     ///
     /// Retrieves the board data from a list of `PlaceInfo`.
     ///
-    pub fn from_infos(infos: Vec<PlaceInfo>) -> Self {
+    pub fn from_infos(infos: &Vec<PlaceInfo>) -> Self {
         let mut board = Board::new();
 
         for info in infos {
@@ -219,7 +226,7 @@ impl Board {
             })
             .collect();
 
-        Board::from_infos(places)
+        Board::from_infos(&places)
     }
 
     ///
