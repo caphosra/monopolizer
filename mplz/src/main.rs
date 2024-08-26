@@ -74,6 +74,7 @@ async fn main() -> std::io::Result<()> {
             .service(root)
             .service(init)
             .service(step)
+            .service(places)
             .service(
                 Files::new("/", "./web/build/")
                     .prefer_utf8(true)
