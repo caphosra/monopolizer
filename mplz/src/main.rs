@@ -1,11 +1,11 @@
+use actix_files::Files;
 use actix_web::web::{Json, Query, Redirect};
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
-use actix_files::Files;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-use mplzlib::serialization::GameInfo;
 use mplzlib::board::GameSession;
 use mplzlib::command::AnalysisCommandArg;
+use mplzlib::serialization::{GameInfo, PlaceProp};
 
 const MONOPOLY_PORT: u16 = 5391;
 
@@ -40,6 +40,24 @@ async fn step(body: Json<StepBody>) -> impl Responder {
     HttpResponse::Ok().body(session.to_json())
 }
 
+#[derive(Serialize)]
+struct PlacesBody {
+    places: Vec<PlaceProp>,
+}
+
+#[post("/places")]
+async fn places(body: Json<GameInfo>) -> impl Responder {
+    let session = GameSession::from_info(&body);
+    let places = session
+        .board
+        .places
+        .iter()
+        .map(|place| place.to_place_prop(&session.board))
+        .collect::<Vec<_>>();
+    let body = PlacesBody { places };
+    HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let arg = AnalysisCommandArg {
@@ -56,7 +74,11 @@ async fn main() -> std::io::Result<()> {
             .service(root)
             .service(init)
             .service(step)
-            .service(Files::new("/", "./web/build/").prefer_utf8(true).show_files_listing())
+            .service(
+                Files::new("/", "./web/build/")
+                    .prefer_utf8(true)
+                    .show_files_listing(),
+            )
     })
     .bind(("127.0.0.1", MONOPOLY_PORT))?
     .run()

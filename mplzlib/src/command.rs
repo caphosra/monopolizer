@@ -73,13 +73,18 @@ impl<'a> GameCommand<'a> {
                     player.money = modified as u32;
                 }
             }
-            Self::SetOwner { player_id, place_id, session } => {
+            Self::SetOwner {
+                player_id,
+                place_id,
+                session,
+            } => {
                 session.board.places[*place_id].set_owner(Some(*player_id));
 
                 let place_name = session.board.places[*place_id].get_place_name();
-                session
-                        .logs
-                        .push(format!("[PLAYER{}] Become an owner of {}.", player_id, place_name))
+                session.logs.push(format!(
+                    "[PLAYER{}] Become an owner of {}.",
+                    player_id, place_name
+                ))
             }
             Self::Save(file_name, session) => {
                 let json = session.to_json();

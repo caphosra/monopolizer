@@ -10,6 +10,8 @@ pub mod utilities;
 
 use std::fmt::{Display, Error, Formatter};
 
+use serde::{Deserialize, Serialize};
+
 use crate::board::Board;
 use crate::events::EventKind;
 use crate::places::chance::Chance;
@@ -22,7 +24,7 @@ use crate::places::nothing::Nothing;
 use crate::places::railroad::Railroad;
 use crate::places::utilities::Utilities;
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
 pub enum BoardColor {
     None,
     Railroad,

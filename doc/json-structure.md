@@ -47,3 +47,16 @@
     ]
 }
 ```
+
+## `IPlaceProp`
+
+```json
+{
+    "place_id": 0, // The id of the place
+    "name": "Boardwalk", // The name of the place
+    "color": "Blue", // The color of the place
+    "price": 400, // [Optional] The price of the place
+    "house_price": 200, // [Optional] The price of a house on the place
+    "rent": 50, // [Optional] The rent of the place
+}
+```

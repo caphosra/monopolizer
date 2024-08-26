@@ -2,6 +2,7 @@ use calamine::{open_workbook, DataType, Range, RangeDeserializerBuilder, Reader,
 use serde::{Deserialize, Serialize};
 
 use crate::board::{Board, GameSession};
+use crate::places::{BoardColor, BoardPlace};
 use crate::player::{Player, PlayerState};
 use crate::strategy::{ExpensiveHousesProtectionStrategy, PlayerStrategy};
 
@@ -38,6 +39,16 @@ pub struct PlaceInfo {
     pub houses: Option<u8>,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct PlaceProp {
+    pub place_id: usize,
+    pub name: String,
+    pub color: BoardColor,
+    pub price: Option<u32>,
+    pub house_price: Option<u32>,
+    pub rent: Option<u32>,
+}
+
 impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
     fn into(self) -> PlayerInfo {
         let (player_id, money, is_bankrupted, jail_turn, position) = self;
@@ -52,6 +63,30 @@ impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
                 None
             },
             position: position as usize,
+        }
+    }
+}
+
+impl dyn BoardPlace + Send {
+    pub fn to_place_prop(&self, board: &Board) -> PlaceProp {
+        let place_id = self.get_id();
+        let name = self.get_place_name().to_string();
+        let color = self.get_color();
+        let price = if self.is_property() {
+            Some(self.get_price())
+        } else {
+            None
+        };
+        let house_price = self.get_price_of_house();
+        let rent = self.get_rent(board);
+
+        PlaceProp {
+            place_id,
+            name,
+            color,
+            price,
+            house_price,
+            rent,
         }
     }
 }
@@ -125,7 +160,10 @@ impl GameSession {
             .map(|player| {
                 let player_info: (i64, i64, String, i64, i64) = player.unwrap();
 
-                Player::from_info(&(player_info.into()), ExpensiveHousesProtectionStrategy::new())
+                Player::from_info(
+                    &(player_info.into()),
+                    ExpensiveHousesProtectionStrategy::new(),
+                )
             })
             .collect();
 
@@ -154,10 +192,9 @@ impl Player {
 
             assert_eq!(info.jail_turn, None);
         } else {
-            player.state = if let Some(jail_turn) =  info.jail_turn {
+            player.state = if let Some(jail_turn) = info.jail_turn {
                 PlayerState::InJail(jail_turn)
-            }
-            else {
+            } else {
                 PlayerState::None
             };
         }
@@ -219,9 +256,17 @@ impl Board {
 
                 PlaceInfo {
                     place_id: id as usize,
-                    owner: if owner >= 0 { Some(owner as usize) } else { None },
+                    owner: if owner >= 0 {
+                        Some(owner as usize)
+                    } else {
+                        None
+                    },
                     is_mortgaged: is_mortgaged == "yes",
-                    houses: if houses >= 0 { Some(houses as u8) } else { None },
+                    houses: if houses >= 0 {
+                        Some(houses as u8)
+                    } else {
+                        None
+                    },
                 }
             })
             .collect();

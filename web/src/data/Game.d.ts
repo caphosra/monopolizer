@@ -18,3 +18,25 @@ export interface IGameInfo {
     players: IPlayerInfo[];
     places: IPlaceInfo[];
 }
+
+export type PlaceColor =
+    | "None"
+    | "Railroad"
+    | "Utilities"
+    | "Brown"
+    | "LightBlue"
+    | "LightPurple"
+    | "Orange"
+    | "Red"
+    | "Yellow"
+    | "Green"
+    | "Blue";
+
+export interface IPlaceProp {
+    place_id: number;
+    name: string;
+    color: PlaceColor;
+    price: number | undefined;
+    house_price: number | undefined;
+    rent: number | undefined;
+}
