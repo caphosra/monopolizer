@@ -101,6 +101,19 @@ export default function Place(props: IPlaceProps) {
             ) : (
                 <div></div>
             )}
+
+            {estate && props.prop.rent ? (
+                <div>Rent: ${props.prop.rent}</div>
+            ) : (
+                <div></div>
+            )}
+
+            {property ? <div>Price: ${props.prop.price}</div> : <div></div>}
+            {estate ? (
+                <div>House price: ${props.prop.house_price}</div>
+            ) : (
+                <div></div>
+            )}
         </div>
     );
 }
