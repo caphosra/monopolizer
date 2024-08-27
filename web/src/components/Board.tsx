@@ -8,6 +8,7 @@ import {
     IGameInfo,
     IPlaceProp,
 } from "../data/Interaction";
+import PlaceTable from "./PlaceTable";
 
 interface IBoardState {
     game: IGameInfo | null;
@@ -43,17 +44,11 @@ function Board() {
     if (state.game && state.places) {
         const game = state.game;
         return (
-            <div>
-                {state.places.map((place) => {
-                    return (
-                        <Place
-                            game={game}
-                            prop={place}
-                            onChanged={onGameInfoUpdated}
-                        />
-                    );
-                })}
-            </div>
+            <PlaceTable
+                game={game}
+                places={state.places}
+                onGameInfoChanged={onGameInfoUpdated}
+            />
         );
     } else {
         return <div>Loading...</div>;

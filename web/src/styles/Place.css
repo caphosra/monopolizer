@@ -1,16 +1,21 @@
 .place {
-    margin: 20px;
-    padding: 10px 20px;
+    margin: 10px;
+    padding: 5px 10px;
 
     border-style: solid;
-    border-width: 5px;
-    border-radius: 20px;
+    border-width: 2px;
+    border-radius: 10px;
     border-color: blue;
 
     background-color: white;
 
-    width: 200px;
-    height: 300px;
+    min-width: 130px;
+    min-height: 200px;
+
+    width: 10%;
+    height: 20%;
+
+    flex: 1;
 }
 
 .place-name {
@@ -35,10 +40,10 @@
 .house {
     margin: 2px;
 
-    border-radius: 8px;
+    border-radius: 6px;
 
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
 }
 
 .hotel-active {
