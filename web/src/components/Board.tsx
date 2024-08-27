@@ -1,9 +1,63 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import logo from "./logo.svg";
 import Place from "./Place";
+import {
+    fetchInit,
+    fetchPlaces,
+    fetchStep,
+    IGameInfo,
+    IPlaceProp,
+} from "../data/Interaction";
+
+interface IBoardState {
+    game: IGameInfo | null;
+    places: IPlaceProp[] | null;
+}
 
 function Board() {
-    return <Place name="Boardwalk" is_mortgaged={false} houses={0} />;
+    const [state, setState] = useState<IBoardState>({
+        game: null,
+        places: null,
+    });
+
+    function onGameInfoUpdated(game: IGameInfo): void {
+        fetchPlaces(game)
+            .then((places) => {
+                setState({ game, places });
+            })
+            .catch((_) => {
+                alert("Failed to fetch /places.");
+            });
+    }
+
+    useEffect(() => {
+        fetchInit(4)
+            .then((game) => {
+                onGameInfoUpdated(game);
+            })
+            .catch((_) => {
+                alert("Failed to fetch /init.");
+            });
+    }, []);
+
+    if (state.game && state.places) {
+        const game = state.game;
+        return (
+            <div>
+                {state.places.map((place) => {
+                    return (
+                        <Place
+                            game={game}
+                            prop={place}
+                            onChanged={onGameInfoUpdated}
+                        />
+                    );
+                })}
+            </div>
+        );
+    } else {
+        return <div>Loading...</div>;
+    }
 }
 
 export default Board;

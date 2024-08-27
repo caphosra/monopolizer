@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import logo from "./logo.svg";
 import "../styles/Place.css";
+import { IGameInfo, IPlaceProp } from "../data/Interaction";
 
 interface IHouseProps {
     houses_num: number;
@@ -13,7 +14,9 @@ function House(props: IHouseProps) {
         <div
             className={
                 props.nth <= props.houses_num
-                    ? (props.houses_num === 5 ? "house hotel-active" : "house house-active")
+                    ? props.houses_num === 5
+                        ? "house hotel-active"
+                        : "house house-active"
                     : "house house-inactive"
             }
             onClick={() => props.onClick(props.nth)}
@@ -22,44 +25,78 @@ function House(props: IHouseProps) {
 }
 
 interface IPlaceProps {
-    name: string;
-    is_mortgaged: boolean;
-    houses: number;
-}
-
-interface IPlaceState {
-    is_mortgaged: boolean;
-    houses: number;
+    prop: IPlaceProp;
+    game: IGameInfo;
+    onChanged: (game: IGameInfo) => void;
 }
 
 export default function Place(props: IPlaceProps) {
-    let [state, setState] = useState<IPlaceState>({ is_mortgaged: false, houses: props.houses });
-
-    let mortgagedOnClick = () => {
-        setState({ is_mortgaged: !state.is_mortgaged, houses: 0 });
-    };
-
-    let houseOnClick = (nth: number) => {
-        if (!state.is_mortgaged) {
-            if (nth === state.houses) {
-                nth = 0;
+    function mortgagedOnClick() {
+        const updatedPlaces = props.game.places.map((place) => {
+            if (place.place_id == props.prop.place_id) {
+                place.is_mortgaged = !place.is_mortgaged;
+                place.houses = 0;
             }
-            setState({ ...state, houses: nth });
+            return place;
+        });
+        props.onChanged({ ...props.game, places: updatedPlaces });
+    }
+
+    function houseOnClick(nth: number) {
+        let changed = false;
+        const updatedPlaces = props.game.places.map((place) => {
+            if (place.place_id == props.prop.place_id) {
+                if (!place.is_mortgaged) {
+                    if (nth === place.houses) {
+                        nth = 0;
+                    }
+                    changed = true;
+                    return { ...place, houses: nth };
+                }
+            }
+            return place;
+        });
+        if (changed) {
+            props.onChanged({ ...props.game, places: updatedPlaces });
         }
-    };
+    }
+
+    const placeState = props.game.places.find(
+        (place) => place.place_id === props.prop.place_id
+    );
 
     return (
         <div className="place">
-            <div className={state.is_mortgaged ? "place-name mortgaged" : "place-name"} onClick={mortgagedOnClick}>{props.name}</div>
-            <div className="houses-container">
-                {[1, 2, 3, 4, 5].map((nth) => (
-                    <House
-                        houses_num={state.houses}
-                        nth={nth}
-                        onClick={houseOnClick}
-                    />
-                ))}
-            </div>
+            {props.prop.color == "None" ? (
+                <div className="place-name">{props.prop.name}</div>
+            ) : (
+                <div
+                    className={
+                        placeState?.is_mortgaged
+                            ? "place-name mortgaged"
+                            : "place-name"
+                    }
+                    onClick={mortgagedOnClick}
+                >
+                    {props.prop.name}
+                </div>
+            )}
+
+            {props.prop.color == "None" ||
+            props.prop.color == "Railroad" ||
+            props.prop.color == "Utilities" ? (
+                <div></div>
+            ) : (
+                <div className="houses-container">
+                    {[1, 2, 3, 4, 5].map((nth) => (
+                        <House
+                            houses_num={placeState?.houses ?? 0}
+                            nth={nth}
+                            onClick={houseOnClick}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
