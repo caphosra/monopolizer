@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import logo from "./logo.svg";
 import "../styles/Place.css";
 import { IGameInfo, IPlaceProp } from "../data/Interaction";
+import { isEstate, isProperty } from "../data/Utils";
 
 interface IHouseProps {
     houses_num: number;
@@ -31,11 +32,16 @@ interface IPlaceProps {
 }
 
 export default function Place(props: IPlaceProps) {
+    const property = isProperty(props.prop.color);
+    const estate = isEstate(props.prop.color);
+
     function mortgagedOnClick() {
         const updatedPlaces = props.game.places.map((place) => {
             if (place.place_id == props.prop.place_id) {
                 place.is_mortgaged = !place.is_mortgaged;
-                place.houses = 0;
+                if (estate) {
+                    place.houses = 0;
+                }
             }
             return place;
         });
@@ -67,9 +73,7 @@ export default function Place(props: IPlaceProps) {
 
     return (
         <div className="place">
-            {props.prop.color == "None" ? (
-                <div className="place-name">{props.prop.name}</div>
-            ) : (
+            {property ? (
                 <div
                     className={
                         placeState?.is_mortgaged
@@ -80,13 +84,11 @@ export default function Place(props: IPlaceProps) {
                 >
                     {props.prop.name}
                 </div>
+            ) : (
+                <div className="place-name">{props.prop.name}</div>
             )}
 
-            {props.prop.color == "None" ||
-            props.prop.color == "Railroad" ||
-            props.prop.color == "Utilities" ? (
-                <div></div>
-            ) : (
+            {estate ? (
                 <div className="houses-container">
                     {[1, 2, 3, 4, 5].map((nth) => (
                         <House
@@ -96,6 +98,8 @@ export default function Place(props: IPlaceProps) {
                         />
                     ))}
                 </div>
+            ) : (
+                <div></div>
             )}
         </div>
     );
