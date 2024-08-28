@@ -11,6 +11,7 @@ import {
 import PlaceTable from "./PlaceTable";
 import "../styles/Board.css";
 import Header, { ContentType } from "./Header";
+import PlayerTable from "./PlayerTable";
 
 interface IBoardState {
     game: IGameInfo | null;
@@ -68,7 +69,7 @@ function Board() {
                                     onGameInfoChanged={onGameInfoUpdated}
                                 />
                             ),
-                            players: <div>Players</div>,
+                            players: <PlayerTable game={game} onChanged={onGameInfoUpdated} />,
                             analysis: <div>Analysis</div>,
                         }[state.content]
                     }
