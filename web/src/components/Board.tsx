@@ -133,6 +133,29 @@ function Board() {
         });
     }
 
+    function onActionInvoked(key: string): void {
+        switch (key) {
+            case "step1":
+                fetchStep(state.game!, 1)
+                    .then((game) => {
+                        onGameInfoUpdated(game);
+                    })
+                    .catch((_) => {
+                        alert("Failed to fetch /step.");
+                    });
+                break;
+            case "step10":
+                fetchStep(state.game!, 10)
+                    .then((game) => {
+                        onGameInfoUpdated(game);
+                    })
+                    .catch((_) => {
+                        alert("Failed to fetch /step.");
+                    });
+                break;
+        }
+    }
+
     if (state.game && state.places) {
         const game = state.game;
         const placeInfos = getPlaceInfoList(game);
@@ -143,7 +166,7 @@ function Board() {
 
         return (
             <div className="root">
-                <Header onClick={onContentTypeChanged} />
+                <Header onClick={onContentTypeChanged} onActionInvoked={onActionInvoked} />
                 <div className="main">
                     {
                         {
