@@ -41,8 +41,14 @@ export interface IPlaceProp {
     rent: number | undefined;
 }
 
+const MONOPOLY_SERVER_PORT = 5391;
+const API_ROOT =
+    process.env.NODE_ENV === "development"
+        ? `http://localhost:${MONOPOLY_SERVER_PORT}`
+        : "";
+
 export async function fetchInit(num: number): Promise<IGameInfo> {
-    let response = await fetch(`/init?num=${num}`);
+    let response = await fetch(`${API_ROOT}/init?num=${num}`);
     if (!response.ok) {
         throw "Failed to fetch /init.";
     }
@@ -54,7 +60,7 @@ export async function fetchStep(
     game: IGameInfo,
     num: number
 ): Promise<IGameInfo> {
-    let response = await fetch("/step", {
+    let response = await fetch(`${API_ROOT}/step`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ game, num }),
@@ -67,7 +73,7 @@ export async function fetchStep(
 }
 
 export async function fetchPlaces(game: IGameInfo): Promise<IPlaceProp[]> {
-    let response = await fetch("/places", {
+    let response = await fetch(`${API_ROOT}/places`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(game),

@@ -1,4 +1,6 @@
+use actix_cors::Cors;
 use actix_files::Files;
+use actix_web::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use actix_web::web::{Json, Query, Redirect};
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
@@ -60,17 +62,22 @@ async fn places(body: Json<GameInfo>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let arg = AnalysisCommandArg {
-        file_name: "some".to_owned(),
-        iteration: 10,
-        simulation_turn: 10,
-    };
-
-    println!("{}", arg.to_string());
     println!("Starting the server...");
 
     HttpServer::new(|| {
+        let cors = if cfg!(debug_assertions) {
+            Cors::default()
+                .allowed_origin("http://localhost:3000")
+                .allowed_methods(vec!["GET", "POST", "OPTIONS"])
+                .allowed_headers(vec![AUTHORIZATION, ACCEPT])
+                .allowed_header(CONTENT_TYPE)
+                .max_age(3600)
+        } else {
+            Cors::default()
+        };
+
         App::new()
+            .wrap(cors)
             .service(root)
             .service(init)
             .service(step)
