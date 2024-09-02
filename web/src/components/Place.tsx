@@ -91,7 +91,9 @@ export default function Place(props: IPlaceProps) {
                     ))}
                 </div>
             );
-            rentComponent = <div>Rent: ${props.prop.rent}</div>;
+            if (props.prop.rent) {
+                rentComponent = <div>Rent: ${props.prop.rent}</div>;
+            }
             housePriceComponent = (
                 <div>House price: ${props.prop.house_price}</div>
             );
