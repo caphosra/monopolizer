@@ -8,10 +8,12 @@ import {
     IGameInfo,
     IPlaceInfo,
     IPlaceProp,
+    IPlayerInfo,
 } from "../data/Interaction";
 import "../styles/PlaceTable.css";
 
 interface IBoardProps {
+    players: IPlayerInfo[];
     places: IPlaceProp[];
     infos: (IPlaceInfo | null)[];
     playerIds: number[];
@@ -33,12 +35,17 @@ export default function PlaceTable(props: IBoardProps) {
                         {[...Array(10)].map((_, column) => {
                             const id = row * 10 + column;
 
+                            const landingPlayers = props.players
+                                .filter((player) => player.position === id)
+                                .map((player) => player.player_id);
+
                             return (
                                 <Place
                                     key={`place${id}`}
                                     prop={props.places[id]}
                                     placeInfo={props.infos[id]}
-                                    player_ids={props.playerIds}
+                                    playerIds={props.playerIds}
+                                    landingPlayers={landingPlayers}
                                     owner_id={props.infos[id]?.owner ?? null}
                                     onHouseClicked={props.onHouseClicked}
                                     onMortgagedClicked={

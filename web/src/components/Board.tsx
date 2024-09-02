@@ -171,6 +171,20 @@ function Board() {
         });
     }
 
+    function onPositionChanged(player_id: number, position: number): void {
+        setState((state) => {
+            const players = state.game!.players.map((player) => {
+                if (player.player_id === player_id) {
+                    return { ...player, position };
+                }
+                return player;
+            });
+
+            const newGame = { ...state.game!, players };
+            return { ...state, game: newGame };
+        });
+    }
+
     if (state.game && state.places) {
         const game = state.game;
         const placeInfos = getPlaceInfoList(game);
@@ -190,6 +204,7 @@ function Board() {
                         {
                             places: (
                                 <PlaceTable
+                                    players={state.game.players}
                                     places={state.places}
                                     infos={placeInfos}
                                     playerIds={playerIds}
@@ -200,11 +215,25 @@ function Board() {
                             ),
                             players: (
                                 <PlayerTable
-                                    game={game}
+                                    players={state.game.players}
+                                    places={state.places}
                                     onMoneyChanged={onMoneyChanged}
+                                    onPositionChanged={onPositionChanged}
                                 />
                             ),
-                            analysis: <div>Analysis</div>,
+                            analysis: (
+                                <Card
+                                    bordered={true}
+                                    style={{
+                                        borderWidth: "5mm",
+                                        borderImageSource:
+                                            "linear-gradient(to right, red, blue)",
+                                        borderImageSlice: "1",
+                                    }}
+                                >
+                                    <div>Analysis</div>
+                                </Card>
+                            ),
                         }[state.content]
                     }
                 </div>

@@ -4,6 +4,7 @@ import "../styles/Place.css";
 import { IGameInfo, IPlaceInfo, IPlaceProp } from "../data/Interaction";
 import { isEstate, isProperty } from "../data/Utils";
 import OwnerDropdown from "./OwnerDropdown";
+import PlayerIcon from "./PlayerIcon";
 
 interface IHouseProps {
     houses_num: number;
@@ -30,7 +31,8 @@ interface IPlaceProps {
     prop: IPlaceProp;
     placeInfo: IPlaceInfo | null;
     owner_id: number | null;
-    player_ids: number[];
+    playerIds: number[];
+    landingPlayers: number[];
     onHouseClicked: (placeId: number, nth: number) => void;
     onMortgagedClicked: (PlaceId: number) => void;
     onOwnerChanged: (placeId: number, owner_id: number | null) => void;
@@ -48,6 +50,13 @@ export default function Place(props: IPlaceProps) {
     let rentComponent = <div></div>;
     let priceComponent = <div></div>;
     let housePriceComponent = <div></div>;
+    const playersComponent = (
+        <div className="place-players">
+            {props.landingPlayers.map((playerId) => (
+                <PlayerIcon playerId={playerId} />
+            ))}
+        </div>
+    );
 
     if (property && props.placeInfo) {
         const placeInfo = props.placeInfo;
@@ -67,7 +76,7 @@ export default function Place(props: IPlaceProps) {
         ownerComponent = (
             <OwnerDropdown
                 owner={props.owner_id}
-                player_ids={props.player_ids}
+                player_ids={props.playerIds}
                 onChanged={(id) =>
                     props.onOwnerChanged(props.prop.place_id, id)
                 }
@@ -108,6 +117,7 @@ export default function Place(props: IPlaceProps) {
             {rentComponent}
             {priceComponent}
             {housePriceComponent}
+            {playersComponent}
         </div>
     );
 }
