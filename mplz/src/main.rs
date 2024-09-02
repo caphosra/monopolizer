@@ -6,10 +6,12 @@ use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 
 use mplzlib::board::GameSession;
-use mplzlib::command::AnalysisCommandArg;
 use mplzlib::serialization::{GameInfo, PlaceProp};
 
-const MONOPOLY_PORT: u16 = 5391;
+const MPLZ_API_PORT: u16 = 5391;
+
+#[cfg(debug_assertions)]
+const MPLZ_WEB_PORT: u16 = 5390;
 
 #[get("/")]
 async fn root() -> impl Responder {
@@ -67,7 +69,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         let cors = if cfg!(debug_assertions) {
             Cors::default()
-                .allowed_origin("http://localhost:3000")
+                .allowed_origin(&format!("http://localhost:{}", MPLZ_WEB_PORT))
                 .allowed_methods(vec!["GET", "POST", "OPTIONS"])
                 .allowed_headers(vec![AUTHORIZATION, ACCEPT])
                 .allowed_header(CONTENT_TYPE)
@@ -88,7 +90,7 @@ async fn main() -> std::io::Result<()> {
                     .show_files_listing(),
             )
     })
-    .bind(("127.0.0.1", MONOPOLY_PORT))?
+    .bind(("127.0.0.1", MPLZ_API_PORT))?
     .run()
     .await
 }
