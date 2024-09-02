@@ -20,7 +20,7 @@ export default function OwnerDropdown(props: IOwnerDropdownProps) {
 
     return (
         <Select
-            defaultValue={props.owner}
+            value={props.owner}
             onChange={props.onChanged}
             options={options}
         />

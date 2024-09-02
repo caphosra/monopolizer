@@ -1,10 +1,11 @@
-import { Table } from "antd";
+import { InputNumber, Table } from "antd";
 import type { TableColumnsType } from "antd";
 import { IGameInfo, IPlayerInfo } from "../data/Interaction";
+import "../styles/PlayerTable.css";
 
 export interface IPlayerProps {
     game: IGameInfo;
-    onChanged: (game: IGameInfo) => void;
+    onMoneyChanged: (player_id: number, money: number) => void;
 }
 
 interface IPlayerTableContent {
@@ -30,15 +31,33 @@ export default function PlayerTable(props: IPlayerProps) {
         };
     });
 
-    return (
-        <Table dataSource={data}>
-            <Column title="ID" dataIndex="id" sorter={(a, b) => a.id - b.id} />
-            <Column
-                title="Money"
-                dataIndex="money"
-                sorter={(a, b) => a.money - b.money}
+    function renderMoneyInputField(content: IPlayerTableContent) {
+        return (
+            <InputNumber
+                prefix="$"
+                value={content.money}
+                disabled={content.status == "Bankrupted"}
+                onChange={(val) => props.onMoneyChanged(content.id, val ?? 0)}
             />
-            <Column title="Status" dataIndex="status" />
-        </Table>
+        );
+    }
+
+    return (
+        <div className="player-table">
+            <Table dataSource={[...data]}>
+                <Column
+                    title="ID"
+                    dataIndex="id"
+                    sorter={(a, b) => a.id - b.id}
+                />
+                <Column
+                    title="Money"
+                    dataIndex="money"
+                    sorter={(a, b) => a.money - b.money}
+                    render={(_, content) => renderMoneyInputField(content)}
+                />
+                <Column title="Status" dataIndex="status" />
+            </Table>
+        </div>
     );
 }

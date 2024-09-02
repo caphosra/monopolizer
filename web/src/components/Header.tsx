@@ -30,14 +30,14 @@ const items = [
         icon: <VscRunAll />,
         children: [
             {
-                "label": "Step 1 turn",
-                "key": "step1",
+                label: "Step 1 turn",
+                key: "step1",
             },
             {
-                "label": "Step 10 turns",
-                "key": "step10",
-            }
-        ]
+                label: "Step 10 turns",
+                key: "step10",
+            },
+        ],
     },
     {
         label: "Analysis",

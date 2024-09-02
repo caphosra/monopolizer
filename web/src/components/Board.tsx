@@ -13,6 +13,7 @@ import "../styles/Board.css";
 import Header, { ContentType } from "./Header";
 import PlayerTable from "./PlayerTable";
 import { getPlaceInfoList } from "../data/Utils";
+import { Card, Divider } from "antd";
 
 interface IBoardState {
     game: IGameInfo | null;
@@ -156,6 +157,20 @@ function Board() {
         }
     }
 
+    function onMoneyChanged(player_id: number, money: number): void {
+        setState((state) => {
+            const players = state.game!.players.map((player) => {
+                if (player.player_id === player_id) {
+                    return { ...player, money };
+                }
+                return player;
+            });
+
+            const newGame = { ...state.game!, players };
+            return { ...state, game: newGame };
+        });
+    }
+
     if (state.game && state.places) {
         const game = state.game;
         const placeInfos = getPlaceInfoList(game);
@@ -166,7 +181,10 @@ function Board() {
 
         return (
             <div className="root">
-                <Header onClick={onContentTypeChanged} onActionInvoked={onActionInvoked} />
+                <Header
+                    onClick={onContentTypeChanged}
+                    onActionInvoked={onActionInvoked}
+                />
                 <div className="main">
                     {
                         {
@@ -183,7 +201,7 @@ function Board() {
                             players: (
                                 <PlayerTable
                                     game={game}
-                                    onChanged={onGameInfoUpdated}
+                                    onMoneyChanged={onMoneyChanged}
                                 />
                             ),
                             analysis: <div>Analysis</div>,
