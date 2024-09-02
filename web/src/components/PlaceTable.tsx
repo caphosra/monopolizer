@@ -36,7 +36,12 @@ export default function PlaceTable(props: IBoardProps) {
                             const id = row * 10 + column;
 
                             const landingPlayers = props.players
-                                .filter((player) => player.position === id)
+                                .filter(
+                                    (player) =>
+                                        (player.jail_turn ?? 0) == 0 &&
+                                        !player.is_bankrupted &&
+                                        player.position === id
+                                )
                                 .map((player) => player.player_id);
 
                             return (
