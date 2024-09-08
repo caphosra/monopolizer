@@ -1,13 +1,4 @@
-import React, { useEffect, useState } from "react";
-import logo from "./logo.svg";
-import Place from "./Place";
-import {
-    fetchInit,
-    fetchPlaces,
-    fetchStep,
-    IGameInfo,
-    IPlaceProp,
-} from "../data/Interaction";
+import React, { useState } from "react";
 import { Menu } from "antd";
 import { FaHouse } from "react-icons/fa6";
 import { FaUser, FaCalculator } from "react-icons/fa";

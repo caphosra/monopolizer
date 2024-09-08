@@ -48,11 +48,11 @@ const API_ROOT =
         : "";
 
 export async function fetchInit(num: number): Promise<IGameInfo> {
-    let response = await fetch(`${API_ROOT}/init?num=${num}`);
+    const response = await fetch(`${API_ROOT}/init?num=${num}`);
     if (!response.ok) {
         throw "Failed to fetch /init.";
     }
-    let info = (await response.json()) as IGameInfo;
+    const info = (await response.json()) as IGameInfo;
     return info;
 }
 
@@ -60,7 +60,7 @@ export async function fetchStep(
     game: IGameInfo,
     num: number
 ): Promise<IGameInfo> {
-    let response = await fetch(`${API_ROOT}/step`, {
+    const response = await fetch(`${API_ROOT}/step`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ game, num }),
@@ -68,12 +68,12 @@ export async function fetchStep(
     if (!response.ok) {
         throw "Failed to fetch /step.";
     }
-    let info = (await response.json()) as IGameInfo;
+    const info = (await response.json()) as IGameInfo;
     return info;
 }
 
 export async function fetchPlaces(game: IGameInfo): Promise<IPlaceProp[]> {
-    let response = await fetch(`${API_ROOT}/places`, {
+    const response = await fetch(`${API_ROOT}/places`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(game),
@@ -81,6 +81,6 @@ export async function fetchPlaces(game: IGameInfo): Promise<IPlaceProp[]> {
     if (!response.ok) {
         throw "Failed to fetch /places.";
     }
-    let places = (await response.json()) as { places: IPlaceProp[] };
+    const places = (await response.json()) as { places: IPlaceProp[] };
     return places.places;
 }

@@ -1,3 +1,4 @@
+import React from "react";
 import { getPlayerColor } from "../data/Color";
 import "../styles/PlayerIcon.css";
 

@@ -22,7 +22,8 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "fmt": "npx prettier . --write",
+        "fmt": "npx prettier --write ./src",
+        "lint": "npx eslint ./src",
         "eject": "react-scripts eject"
     },
     "eslintConfig": {
@@ -42,5 +43,14 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.10.0",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-react": "^7.35.2",
+        "globals": "^15.9.0",
+        "prettier": "^3.3.3",
+        "typescript-eslint": "^8.4.0"
     }
 }

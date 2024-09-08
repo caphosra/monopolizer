@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import logo from "./logo.svg";
-import Place from "./Place";
 import {
     fetchInit,
     fetchPlaces,
@@ -13,7 +11,7 @@ import "../styles/Board.css";
 import Header, { ContentType } from "./Header";
 import PlayerTable from "./PlayerTable";
 import { getPlaceInfoList } from "../data/Utils";
-import { Card, Divider } from "antd";
+import { Card } from "antd";
 
 interface IBoardState {
     game: IGameInfo | null;
@@ -35,7 +33,7 @@ function Board() {
                     return { ...state, game, places };
                 });
             })
-            .catch((_) => {
+            .catch(() => {
                 alert("Failed to fetch /places.");
             });
     }
@@ -51,7 +49,7 @@ function Board() {
             .then((game) => {
                 onGameInfoUpdated(game);
             })
-            .catch((_) => {
+            .catch(() => {
                 alert("Failed to fetch /init.");
             });
     }, []);
@@ -76,7 +74,7 @@ function Board() {
                         return { ...state, places };
                     });
                 })
-                .catch((_) => {
+                .catch(() => {
                     alert("Failed to fetch /places.");
                 });
             return { ...state, game: newGame };
@@ -104,7 +102,7 @@ function Board() {
                         return { ...state, places };
                     });
                 })
-                .catch((_) => {
+                .catch(() => {
                     alert("Failed to fetch /places.");
                 });
             return { ...state, game: newGame };
@@ -127,7 +125,7 @@ function Board() {
                         return { ...state, places };
                     });
                 })
-                .catch((_) => {
+                .catch(() => {
                     alert("Failed to fetch /places.");
                 });
             return { ...state, game: newGame };
@@ -141,7 +139,7 @@ function Board() {
                     .then((game) => {
                         onGameInfoUpdated(game);
                     })
-                    .catch((_) => {
+                    .catch(() => {
                         alert("Failed to fetch /step.");
                     });
                 break;
@@ -150,7 +148,7 @@ function Board() {
                     .then((game) => {
                         onGameInfoUpdated(game);
                     })
-                    .catch((_) => {
+                    .catch(() => {
                         alert("Failed to fetch /step.");
                     });
                 break;

@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import logo from "./logo.svg";
+import React from "react";
 import "../styles/Place.css";
-import { IGameInfo, IPlaceInfo, IPlaceProp } from "../data/Interaction";
+import { IPlaceInfo, IPlaceProp } from "../data/Interaction";
 import { isEstate, isProperty } from "../data/Utils";
 import OwnerDropdown from "./OwnerDropdown";
 import PlayerIcon from "./PlayerIcon";
@@ -53,7 +52,10 @@ export default function Place(props: IPlaceProps) {
     const playersComponent = (
         <div className="place-players">
             {props.landingPlayers.map((playerId) => (
-                <PlayerIcon playerId={playerId} />
+                <PlayerIcon
+                    key={`player-icon-${playerId}`}
+                    playerId={playerId}
+                />
             ))}
         </div>
     );
@@ -91,6 +93,7 @@ export default function Place(props: IPlaceProps) {
                 <div className="houses-container">
                     {[1, 2, 3, 4, 5].map((nth) => (
                         <House
+                            key={`house-${nth}`}
                             houses_num={houses}
                             nth={nth}
                             onClick={(nth) =>

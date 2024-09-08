@@ -1,8 +1,5 @@
-import React, { useState } from "react";
-import logo from "./logo.svg";
+import React from "react";
 import "../styles/Place.css";
-import { IGameInfo, IPlaceProp } from "../data/Interaction";
-import { isEstate, isProperty } from "../data/Utils";
 import { Select } from "antd";
 
 interface IOwnerDropdownProps {
@@ -12,7 +9,7 @@ interface IOwnerDropdownProps {
 }
 
 export default function OwnerDropdown(props: IOwnerDropdownProps) {
-    const options: { value: number | null; label: any }[] =
+    const options: { value: number | null; label: JSX.Element }[] =
         props.player_ids.map((id) => {
             return { value: id, label: <div>Player{id}</div> };
         });

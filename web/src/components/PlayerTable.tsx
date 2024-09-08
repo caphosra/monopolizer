@@ -1,11 +1,6 @@
+import React from "react";
 import { InputNumber, Select, Table } from "antd";
-import type { TableColumnsType } from "antd";
-import {
-    IGameInfo,
-    IPlaceInfo,
-    IPlaceProp,
-    IPlayerInfo,
-} from "../data/Interaction";
+import { IPlaceProp, IPlayerInfo } from "../data/Interaction";
 import "../styles/PlayerTable.css";
 
 export interface IPlayerProps {
