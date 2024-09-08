@@ -29,6 +29,16 @@ impl AnalysisCommandArg {
 pub enum GameCommand<'a> {
     Init(u32, &'a mut Option<GameSession>),
     Step(u32, &'a mut GameSession),
+    ModifyMoney {
+        player_id: usize,
+        money: i32,
+        session: &'a mut GameSession,
+    },
+    SetOwner {
+        player_id: usize,
+        place_id: usize,
+        session: &'a mut GameSession,
+    },
     Save(&'a str, &'a GameSession),
     Load(&'a str, &'a mut Option<GameSession>),
     Analyze(AnalysisCommandArg, &'a GameSession),
@@ -47,6 +57,34 @@ impl<'a> GameCommand<'a> {
                 for _ in 0..*step {
                     session.spend_one_turn();
                 }
+            }
+            Self::ModifyMoney {
+                player_id,
+                money,
+                session,
+            } => {
+                let player = session.get_player_mut(*player_id);
+                let modified = player.money as i32 + *money;
+                if modified < 0 {
+                    session
+                        .logs
+                        .push(format!("[PLAYER{}] Failed to pay ${}.", player_id, -*money))
+                } else {
+                    player.money = modified as u32;
+                }
+            }
+            Self::SetOwner {
+                player_id,
+                place_id,
+                session,
+            } => {
+                session.board.places[*place_id].set_owner(Some(*player_id));
+
+                let place_name = session.board.places[*place_id].get_place_name();
+                session.logs.push(format!(
+                    "[PLAYER{}] Become an owner of {}.",
+                    player_id, place_name
+                ))
             }
             Self::Save(file_name, session) => {
                 let json = session.to_json();

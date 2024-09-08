@@ -1,125 +1,96 @@
-use std::sync::Mutex;
-
-use actix_web::web::Json;
-use actix_web::{post, App, HttpResponse, HttpServer, Responder};
-use once_cell::sync::Lazy;
+use actix_cors::Cors;
+use actix_files::Files;
+use actix_web::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
+use actix_web::web::{Json, Query, Redirect};
+use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
+use serde::{Deserialize, Serialize};
 
 use mplzlib::board::GameSession;
-use mplzlib::command::{AnalysisCommandArg, GameCommand};
+use mplzlib::serialization::{GameInfo, PlaceProp};
 
-const MONOPOLY_PORT: u16 = 5391;
+const MPLZ_API_PORT: u16 = 5391;
 
-static GLOBAL_GAME_SESSION: Lazy<Mutex<Option<GameSession>>> = Lazy::new(|| Mutex::new(None));
+#[cfg(debug_assertions)]
+const MPLZ_WEB_PORT: u16 = 5390;
 
-#[post("/init")]
-async fn init(player_num: String) -> impl Responder {
-    match player_num.parse::<u32>() {
-        Ok(player_num) => {
-            let mut board = GLOBAL_GAME_SESSION.lock().unwrap();
+#[get("/")]
+async fn root() -> impl Responder {
+    Redirect::to("/index.html")
+}
 
-            match GameCommand::Init(player_num, &mut board).execute() {
-                Ok(_) => {
-                    let msg = format!("Successfully initialized with {} player(s).", player_num);
-                    println!("[/init] {}", msg);
-                    HttpResponse::Ok().body(msg)
-                }
-                Err(_) => HttpResponse::BadRequest().body("Failed to initialize the board."),
-            }
-        }
-        Err(_) => HttpResponse::BadRequest().body("The number of player is not valid."),
-    }
+#[derive(Deserialize)]
+struct InitQuery {
+    num: u32,
+}
+
+#[get("/init")]
+async fn init(query: Query<InitQuery>) -> impl Responder {
+    let board = GameSession::new(query.num);
+    board.to_json()
+}
+
+#[derive(Deserialize)]
+struct StepBody {
+    game: GameInfo,
+    num: u32,
 }
 
 #[post("/step")]
-async fn step(step: String) -> impl Responder {
-    match step.parse::<u32>() {
-        Ok(step) => {
-            let mut board = GLOBAL_GAME_SESSION.lock().unwrap();
-
-            match board.as_mut() {
-                Some(board) => match GameCommand::Step(step, board).execute() {
-                    Ok(_) => {
-                        let msg = format!("Stepped {} times.", step);
-                        println!("[/step] {}", msg);
-                        HttpResponse::Ok().body(msg)
-                    }
-                    Err(_) => HttpResponse::BadRequest().body("Failed to initialize the board."),
-                },
-                None => HttpResponse::BadRequest().body("The board has not been initialized."),
-            }
-        }
-        Err(_) => HttpResponse::BadRequest().body("The number of player is not valid."),
+async fn step(body: Json<StepBody>) -> impl Responder {
+    let mut session = GameSession::from_info(&body.game);
+    for _ in 0..body.num {
+        session.spend_one_turn();
     }
+    HttpResponse::Ok().body(session.to_json())
 }
 
-#[post("/save")]
-async fn save(file_name: String) -> impl Responder {
-    let mut board = GLOBAL_GAME_SESSION.lock().unwrap();
-
-    match board.as_mut() {
-        Some(board) => match GameCommand::Save(&file_name, board).execute() {
-            Ok(_) => {
-                let msg = format!("Successfully saved to \"{}\".", file_name);
-                println!("[/save] {}", msg);
-                HttpResponse::Ok().body(msg)
-            }
-            Err(_) => HttpResponse::BadRequest().body("Failed to save the board to the file."),
-        },
-        None => HttpResponse::BadRequest().body("The board has not been initialized."),
-    }
+#[derive(Serialize)]
+struct PlacesBody {
+    places: Vec<PlaceProp>,
 }
 
-#[post("/load")]
-async fn load(file_name: String) -> impl Responder {
-    let mut board = GLOBAL_GAME_SESSION.lock().unwrap();
-
-    match GameCommand::Load(&file_name, &mut board).execute() {
-        Ok(_) => {
-            let msg = format!("Successfully loaded \"{}\".", file_name);
-            println!("[/load] {}", msg);
-            HttpResponse::Ok().body(msg)
-        }
-        Err(_) => HttpResponse::BadRequest().body("Failed to load the board from the file."),
-    }
-}
-
-#[post("/analyze")]
-async fn analyze(arg: Json<AnalysisCommandArg>) -> impl Responder {
-    let board = GLOBAL_GAME_SESSION.lock().unwrap();
-
-    match board.as_ref() {
-        Some(board) => match GameCommand::Analyze(arg.0, board).execute() {
-            Ok(_) => {
-                let msg = format!("Successfully analyzed.");
-                println!("[/analyze] {}", msg);
-                HttpResponse::Ok().body(msg)
-            }
-            Err(_) => HttpResponse::BadRequest().body("Failed to load the board from the file."),
-        },
-        None => HttpResponse::BadRequest().body("The board has not been initialized."),
-    }
+#[post("/places")]
+async fn places(body: Json<GameInfo>) -> impl Responder {
+    let session = GameSession::from_info(&body);
+    let places = session
+        .board
+        .places
+        .iter()
+        .map(|place| place.to_place_prop(&session.board))
+        .collect::<Vec<_>>();
+    let body = PlacesBody { places };
+    HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let arg = AnalysisCommandArg {
-        file_name: "some".to_owned(),
-        iteration: 10,
-        simulation_turn: 10,
-    };
-
-    println!("{}", arg.to_string());
     println!("Starting the server...");
 
     HttpServer::new(|| {
+        let cors = if cfg!(debug_assertions) {
+            Cors::default()
+                .allowed_origin(&format!("http://localhost:{}", MPLZ_WEB_PORT))
+                .allowed_methods(vec!["GET", "POST", "OPTIONS"])
+                .allowed_headers(vec![AUTHORIZATION, ACCEPT])
+                .allowed_header(CONTENT_TYPE)
+                .max_age(3600)
+        } else {
+            Cors::default()
+        };
+
         App::new()
+            .wrap(cors)
+            .service(root)
             .service(init)
             .service(step)
-            .service(save)
-            .service(load)
-            .service(analyze)
+            .service(places)
+            .service(
+                Files::new("/", "./web/build/")
+                    .prefer_utf8(true)
+                    .show_files_listing(),
+            )
     })
-    .bind(("127.0.0.1", MONOPOLY_PORT))?
+    .bind(("127.0.0.1", MPLZ_API_PORT))?
     .run()
     .await
 }

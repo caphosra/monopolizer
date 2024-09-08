@@ -1,0 +1,7 @@
+.place-table-row {
+    display: flex;
+    flex-direction: row;
+
+    padding: 10px;
+    width: auto;
+}

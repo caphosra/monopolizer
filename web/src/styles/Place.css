@@ -1,0 +1,64 @@
+.place {
+    margin: 10px;
+    padding: 5px 10px;
+
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: blue;
+
+    background-color: white;
+
+    min-width: 130px;
+    min-height: 200px;
+
+    width: 10%;
+    height: 20%;
+
+    flex: 1;
+}
+
+.place-name {
+    font-size: 1.2em;
+    text-align: center;
+
+    width: 90%;
+
+    margin: 10px auto;
+}
+
+.mortgaged {
+    text-decoration: line-through;
+    color: red;
+}
+
+.houses-container {
+    display: flex;
+    justify-content: center;
+}
+
+.house {
+    margin: 2px;
+
+    border-radius: 6px;
+
+    width: 20px;
+    height: 20px;
+}
+
+.hotel-active {
+    background-color: rgb(255, 0, 0);
+}
+
+.house-active {
+    background-color: rgb(91, 202, 0);
+}
+
+.house-inactive {
+    background-color: rgb(26, 26, 26);
+}
+
+.place-players {
+    display: flex;
+    justify-content: center;
+}

@@ -2,6 +2,7 @@ use calamine::{open_workbook, DataType, Range, RangeDeserializerBuilder, Reader,
 use serde::{Deserialize, Serialize};
 
 use crate::board::{Board, GameSession};
+use crate::places::{BoardColor, BoardPlace};
 use crate::player::{Player, PlayerState};
 use crate::strategy::{ExpensiveHousesProtectionStrategy, PlayerStrategy};
 
@@ -23,7 +24,7 @@ pub struct PlayerInfo {
     pub player_id: usize,
     pub money: u32,
     pub is_bankrupted: bool,
-    pub jail_turn: i8,
+    pub jail_turn: Option<u8>,
     pub position: usize,
 }
 
@@ -33,10 +34,19 @@ pub struct PlayerInfo {
 #[derive(Serialize, Deserialize)]
 pub struct PlaceInfo {
     pub place_id: usize,
-    pub place_name: String,
-    pub owner: i32,
+    pub owner: Option<usize>,
     pub is_mortgaged: bool,
-    pub houses: i32,
+    pub houses: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PlaceProp {
+    pub place_id: usize,
+    pub name: String,
+    pub color: BoardColor,
+    pub price: Option<u32>,
+    pub house_price: Option<u32>,
+    pub rent: Option<u32>,
 }
 
 impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
@@ -47,22 +57,49 @@ impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
             player_id: player_id as usize,
             money: money as u32,
             is_bankrupted: is_bankrupted == "yes",
-            jail_turn: jail_turn as i8,
+            jail_turn: if jail_turn >= 0 {
+                Some(jail_turn as u8)
+            } else {
+                None
+            },
             position: position as usize,
+        }
+    }
+}
+
+impl dyn BoardPlace + Send {
+    pub fn to_place_prop(&self, board: &Board) -> PlaceProp {
+        let place_id = self.get_id();
+        let name = self.get_place_name().to_string();
+        let color = self.get_color();
+        let price = if self.is_property() {
+            Some(self.get_price())
+        } else {
+            None
+        };
+        let house_price = self.get_price_of_house();
+        let rent = self.get_rent(board);
+
+        PlaceProp {
+            place_id,
+            name,
+            color,
+            price,
+            house_price,
+            rent,
         }
     }
 }
 
 impl GameSession {
     ///
-    /// Reconstructs a game session from JSON.
+    /// Reconstructs a game session from GameInfo.
     ///
-    pub fn from_json(json: &str) -> Self {
-        let game_info: GameInfo = serde_json::from_str(json).unwrap();
+    pub fn from_info(game_info: &GameInfo) -> Self {
         let mut game = GameSession::new(game_info.players.len() as u32);
 
         let mut players = Vec::new();
-        for player_info in game_info.players {
+        for player_info in &game_info.players {
             players.push(Player::from_info(
                 player_info,
                 ExpensiveHousesProtectionStrategy::new(),
@@ -71,9 +108,17 @@ impl GameSession {
         game.players = players;
 
         game.turn = game_info.turn;
-        game.board = Board::from_infos(game_info.places);
+        game.board = Board::from_infos(&game_info.places);
 
         game
+    }
+
+    ///
+    /// Reconstructs a game session from JSON.
+    ///
+    pub fn from_json(json: &str) -> Self {
+        let game_info: GameInfo = serde_json::from_str(json).unwrap();
+        GameSession::from_info(&game_info)
     }
 
     ///
@@ -115,7 +160,10 @@ impl GameSession {
             .map(|player| {
                 let player_info: (i64, i64, String, i64, i64) = player.unwrap();
 
-                Player::from_info(player_info.into(), ExpensiveHousesProtectionStrategy::new())
+                Player::from_info(
+                    &(player_info.into()),
+                    ExpensiveHousesProtectionStrategy::new(),
+                )
             })
             .collect();
 
@@ -135,20 +183,20 @@ impl Player {
     ///
     /// Retrieves the player data from `PlayerInfo`.
     ///
-    pub fn from_info(info: PlayerInfo, strategy: Box<dyn PlayerStrategy + Send>) -> Self {
+    pub fn from_info(info: &PlayerInfo, strategy: Box<dyn PlayerStrategy + Send>) -> Self {
         let mut player = Player::new(info.player_id, strategy);
         player.money = info.money;
 
         if info.is_bankrupted {
             player.state = PlayerState::Bankrupted;
 
-            assert_eq!(info.jail_turn, -1);
+            assert_eq!(info.jail_turn, None);
         } else {
-            if info.jail_turn >= 0 {
-                player.state = PlayerState::InJail(info.jail_turn as u8);
+            player.state = if let Some(jail_turn) = info.jail_turn {
+                PlayerState::InJail(jail_turn)
             } else {
-                player.state = PlayerState::None;
-            }
+                PlayerState::None
+            };
         }
 
         player.position = info.position;
@@ -161,9 +209,9 @@ impl Player {
     ///
     pub fn get_info(&self) -> PlayerInfo {
         let (is_bankrupted, jail_turn) = match self.state {
-            PlayerState::None => (false, -1),
-            PlayerState::Bankrupted => (true, -1),
-            PlayerState::InJail(turn) => (false, turn as i8),
+            PlayerState::None => (false, None),
+            PlayerState::Bankrupted => (true, None),
+            PlayerState::InJail(turn) => (false, Some(turn)),
         };
 
         PlayerInfo {
@@ -180,19 +228,17 @@ impl Board {
     ///
     /// Retrieves the board data from a list of `PlaceInfo`.
     ///
-    pub fn from_infos(infos: Vec<PlaceInfo>) -> Self {
+    pub fn from_infos(infos: &Vec<PlaceInfo>) -> Self {
         let mut board = Board::new();
 
         for info in infos {
             let place = &mut board.places[info.place_id];
 
-            assert_eq!(place.get_place_name(), &info.place_name);
-
-            if info.owner >= 0 {
-                place.set_owner(Some(info.owner as usize));
+            if let Some(owner) = info.owner {
+                place.set_owner(Some(owner));
             }
-            if info.houses >= 0 {
-                place.set_num_houses(info.houses as u8);
+            if let Some(houses) = info.houses {
+                place.set_num_houses(houses);
             }
             place.set_mortgaged(info.is_mortgaged);
         }
@@ -205,20 +251,27 @@ impl Board {
         let places = places_data
             .into_iter()
             .map(|place| {
-                let (id, name, owner, is_mortgaged, houses): (i64, String, i64, String, i64) =
+                let (id, _, owner, is_mortgaged, houses): (i64, String, i64, String, i64) =
                     place.unwrap();
 
                 PlaceInfo {
                     place_id: id as usize,
-                    place_name: name,
-                    owner: owner as i32,
+                    owner: if owner >= 0 {
+                        Some(owner as usize)
+                    } else {
+                        None
+                    },
                     is_mortgaged: is_mortgaged == "yes",
-                    houses: houses as i32,
+                    houses: if houses >= 0 {
+                        Some(houses as u8)
+                    } else {
+                        None
+                    },
                 }
             })
             .collect();
 
-        Board::from_infos(places)
+        Board::from_infos(&places)
     }
 
     ///
@@ -230,10 +283,9 @@ impl Board {
             if place.is_property() {
                 infos.push(PlaceInfo {
                     place_id: place.get_id(),
-                    place_name: place.get_place_name().to_string(),
-                    owner: place.get_owner().map_or(-1, |owner| owner as i32),
+                    owner: place.get_owner(),
                     is_mortgaged: place.is_mortgaged(),
-                    houses: place.get_num_houses().map_or(-1, |owner| owner as i32),
+                    houses: place.get_num_houses(),
                 });
             }
         }
