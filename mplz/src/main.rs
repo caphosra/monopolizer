@@ -3,6 +3,7 @@ use actix_files::Files;
 use actix_web::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use actix_web::web::{Json, Query, Redirect};
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
+use mplzlib::appraiser::Appraiser;
 use serde::{Deserialize, Serialize};
 
 use mplzlib::board::GameSession;
@@ -62,6 +63,23 @@ async fn places(body: Json<GameInfo>) -> impl Responder {
     HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
 }
 
+#[derive(Serialize)]
+struct TapBody {
+    taps: Vec<u32>,
+}
+
+#[post("/tap")]
+async fn tap(body: Json<GameInfo>) -> impl Responder {
+    let session = GameSession::from_info(&body);
+    let taps = session
+        .players
+        .iter()
+        .map(|player| Appraiser::get_tap(player, &session.board))
+        .collect();
+    let body = TapBody { taps };
+    HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Starting the server...");
@@ -84,6 +102,7 @@ async fn main() -> std::io::Result<()> {
             .service(init)
             .service(step)
             .service(places)
+            .service(tap)
             .service(
                 Files::new("/", "./web/build/")
                     .prefer_utf8(true)

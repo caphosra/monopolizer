@@ -84,3 +84,16 @@ export async function fetchPlaces(game: IGameInfo): Promise<IPlaceProp[]> {
     const places = (await response.json()) as { places: IPlaceProp[] };
     return places.places;
 }
+
+export async function fetchTap(game: IGameInfo): Promise<number[]> {
+    const response = await fetch(`${API_ROOT}/tap`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(game),
+    });
+    if (!response.ok) {
+        throw "Failed to fetch /tap.";
+    }
+    const places = (await response.json()) as { taps: number[] };
+    return places.taps;
+}

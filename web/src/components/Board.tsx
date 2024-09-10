@@ -3,6 +3,7 @@ import {
     fetchInit,
     fetchPlaces,
     fetchStep,
+    fetchTap,
     IGameInfo,
     IPlaceProp,
 } from "../data/Interaction";
@@ -11,12 +12,13 @@ import "../styles/Board.css";
 import Header, { ContentType } from "./Header";
 import PlayerTable from "./PlayerTable";
 import { getPlaceInfoList } from "../data/Utils";
-import { Card } from "antd";
+import AnalysisBoard from "./AnalysisBoard";
 
 interface IBoardState {
     game: IGameInfo | null;
     places: IPlaceProp[] | null;
     content: ContentType;
+    taps: number[] | null;
 }
 
 function Board() {
@@ -24,6 +26,7 @@ function Board() {
         game: null,
         places: null,
         content: "places",
+        taps: null
     });
 
     function onGameInfoUpdated(game: IGameInfo): void {
@@ -53,6 +56,20 @@ function Board() {
                 alert("Failed to fetch /init.");
             });
     }, []);
+
+    useEffect(() => {
+        if (state.game) {
+            fetchTap(state.game)
+            .then((taps) => {
+                setState((state) => {
+                    return { ...state, taps };
+                });
+            })
+            .catch(() => {
+                alert("Failed to fetch /tap.");
+            });
+        }
+    }, [state.game]);
 
     function onHouseClicked(placeId: number, nth: number): void {
         setState((state) => {
@@ -191,6 +208,8 @@ function Board() {
             .filter((player) => !player.is_bankrupted)
             .map((player) => player.player_id);
 
+        console.log(fetchTap(game));
+
         return (
             <div className="root">
                 <Header
@@ -220,17 +239,7 @@ function Board() {
                                 />
                             ),
                             analysis: (
-                                <Card
-                                    bordered={true}
-                                    style={{
-                                        borderWidth: "5mm",
-                                        borderImageSource:
-                                            "linear-gradient(to right, red, blue)",
-                                        borderImageSlice: "1",
-                                    }}
-                                >
-                                    <div>Analysis</div>
-                                </Card>
+                                <AnalysisBoard taps={state.taps} />
                             ),
                         }[state.content]
                     }
