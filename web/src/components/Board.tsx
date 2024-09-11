@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
     fetchInit,
+    fetchMoney,
     fetchPlaces,
     fetchStep,
     fetchTap,
@@ -19,6 +20,9 @@ interface IBoardState {
     places: IPlaceProp[] | null;
     content: ContentType;
     taps: number[] | null;
+    money: number[] | null;
+    available: number[] | null;
+    total: number[] | null;
 }
 
 function Board() {
@@ -26,7 +30,10 @@ function Board() {
         game: null,
         places: null,
         content: "places",
-        taps: null
+        taps: null,
+        money: null,
+        available: null,
+        total: null,
     });
 
     function onGameInfoUpdated(game: IGameInfo): void {
@@ -60,14 +67,33 @@ function Board() {
     useEffect(() => {
         if (state.game) {
             fetchTap(state.game)
-            .then((taps) => {
-                setState((state) => {
-                    return { ...state, taps };
+                .then((taps) => {
+                    setState((state) => {
+                        return { ...state, taps };
+                    });
+                })
+                .catch(() => {
+                    alert("Failed to fetch /tap.");
                 });
-            })
-            .catch(() => {
-                alert("Failed to fetch /tap.");
-            });
+        }
+    }, [state.game]);
+
+    useEffect(() => {
+        if (state.game) {
+            fetchMoney(state.game)
+                .then((money) => {
+                    setState((state) => {
+                        return {
+                            ...state,
+                            money: money.money,
+                            available: money.available,
+                            total: money.total,
+                        };
+                    });
+                })
+                .catch(() => {
+                    alert("Failed to fetch /money.");
+                });
         }
     }, [state.game]);
 
@@ -239,7 +265,12 @@ function Board() {
                                 />
                             ),
                             analysis: (
-                                <AnalysisBoard taps={state.taps} />
+                                <AnalysisBoard
+                                    taps={state.taps}
+                                    money={state.money}
+                                    available={state.available}
+                                    total={state.total}
+                                />
                             ),
                         }[state.content]
                     }

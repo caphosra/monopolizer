@@ -97,3 +97,24 @@ export async function fetchTap(game: IGameInfo): Promise<number[]> {
     const places = (await response.json()) as { taps: number[] };
     return places.taps;
 }
+
+export interface IFetchMoneyResponse {
+    money: number[];
+    available: number[];
+    total: number[];
+}
+
+export async function fetchMoney(
+    game: IGameInfo
+): Promise<IFetchMoneyResponse> {
+    const response = await fetch(`${API_ROOT}/money`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(game),
+    });
+    if (!response.ok) {
+        throw "Failed to fetch /money.";
+    }
+    const result = (await response.json()) as IFetchMoneyResponse;
+    return result;
+}

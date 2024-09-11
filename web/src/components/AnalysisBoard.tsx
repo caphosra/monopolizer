@@ -1,17 +1,27 @@
 import React from "react";
-import IndexesChart from "./IndexesChart";
+import TapChart from "./graphs/TapChart";
+import MoneyChart from "./graphs/MoneyChart";
 
 export interface IAnalysisBoardProps {
     taps: number[] | null;
+    money: number[] | null;
+    available: number[] | null;
+    total: number[] | null;
 }
 
 export default function AnalysisBoard(props: IAnalysisBoardProps) {
-    if (props.taps) {
+    if (props.taps && props.money) {
         return (
-            <IndexesChart taps={props.taps} />
+            <div>
+                <TapChart taps={props.taps} />
+                <MoneyChart
+                    money={props.money}
+                    available={props.available!}
+                    total={props.total!}
+                />
+            </div>
         );
-    }
-    else {
+    } else {
         return <div>Now loading...</div>;
     }
 }

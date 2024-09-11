@@ -80,6 +80,39 @@ async fn tap(body: Json<GameInfo>) -> impl Responder {
     HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
 }
 
+#[derive(Serialize)]
+struct MoneyBody {
+    money: Vec<u32>,
+    available: Vec<u32>,
+    total: Vec<u32>,
+}
+
+#[post("/money")]
+async fn money(body: Json<GameInfo>) -> impl Responder {
+    let session = GameSession::from_info(&body);
+    let money = session
+        .players
+        .iter()
+        .map(|player| player.money)
+        .collect::<Vec<_>>();
+    let total = session
+        .players
+        .iter()
+        .map(|player| Appraiser::get_payable_money(player, &session.board))
+        .collect::<Vec<_>>();
+    let available = money
+        .iter()
+        .zip(total.iter())
+        .map(|(money, total)| total - money)
+        .collect();
+    let body = MoneyBody {
+        money,
+        available,
+        total,
+    };
+    HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Starting the server...");
@@ -103,6 +136,7 @@ async fn main() -> std::io::Result<()> {
             .service(step)
             .service(places)
             .service(tap)
+            .service(money)
             .service(
                 Files::new("/", "./web/build/")
                     .prefer_utf8(true)
