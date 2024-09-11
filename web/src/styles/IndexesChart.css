@@ -1,5 +1,31 @@
 .chart {
-    margin: 20px;
-    width: 500px;
+    margin: 10px 5%;
+    width: 40%;
     height: 300px;
+    padding: 0;
+    text-align: center;
+}
+
+.chart-box {
+    display: grid;
+    gap: 10px;
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.tap-chart-box {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.money-chart-box {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.survival-graph-box {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-wrap: wrap;
 }

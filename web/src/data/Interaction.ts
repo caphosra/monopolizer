@@ -118,3 +118,20 @@ export async function fetchMoney(
     const result = (await response.json()) as IFetchMoneyResponse;
     return result;
 }
+
+export async function fetchSurvival(
+    game: IGameInfo,
+    num: number,
+    depth: number
+): Promise<number[]> {
+    const response = await fetch(`${API_ROOT}/survival`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ game, num, depth }),
+    });
+    if (!response.ok) {
+        throw "Failed to fetch /survival.";
+    }
+    const result = (await response.json()) as { survival_rates: number[] };
+    return result.survival_rates;
+}

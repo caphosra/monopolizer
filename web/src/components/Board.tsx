@@ -4,6 +4,7 @@ import {
     fetchMoney,
     fetchPlaces,
     fetchStep,
+    fetchSurvival,
     fetchTap,
     IGameInfo,
     IPlaceProp,
@@ -23,6 +24,7 @@ interface IBoardState {
     money: number[] | null;
     available: number[] | null;
     total: number[] | null;
+    survivalRates: number[] | null;
 }
 
 function Board() {
@@ -34,6 +36,7 @@ function Board() {
         money: null,
         available: null,
         total: null,
+        survivalRates: null,
     });
 
     function onGameInfoUpdated(game: IGameInfo): void {
@@ -93,6 +96,22 @@ function Board() {
                 })
                 .catch(() => {
                     alert("Failed to fetch /money.");
+                });
+        }
+    }, [state.game]);
+
+    useEffect(() => {
+        const NUM = 10;
+        const DEPTH = 10;
+        if (state.game) {
+            fetchSurvival(state.game, NUM, DEPTH)
+                .then((survivalRates) => {
+                    setState((state) => {
+                        return { ...state, survivalRates };
+                    });
+                })
+                .catch(() => {
+                    alert("Failed to fetch /survival.");
                 });
         }
     }, [state.game]);
@@ -234,8 +253,6 @@ function Board() {
             .filter((player) => !player.is_bankrupted)
             .map((player) => player.player_id);
 
-        console.log(fetchTap(game));
-
         return (
             <div className="root">
                 <Header
@@ -270,6 +287,7 @@ function Board() {
                                     money={state.money}
                                     available={state.available}
                                     total={state.total}
+                                    survivalRates={state.survivalRates}
                                 />
                             ),
                         }[state.content]

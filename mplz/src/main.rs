@@ -4,6 +4,7 @@ use actix_web::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use actix_web::web::{Json, Query, Redirect};
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
 use mplzlib::appraiser::Appraiser;
+use mplzlib::player::PlayerState;
 use serde::{Deserialize, Serialize};
 
 use mplzlib::board::GameSession;
@@ -113,6 +114,39 @@ async fn money(body: Json<GameInfo>) -> impl Responder {
     HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
 }
 
+#[derive(Deserialize)]
+struct SurvivalRequest {
+    game: GameInfo,
+    num: u32,
+    depth: u32,
+}
+
+#[derive(Serialize)]
+struct SurvivalResponse {
+    survival_rates: Vec<f32>
+}
+
+#[post("/survival")]
+async fn survival(body: Json<SurvivalRequest>) -> impl Responder {
+    let mut counter = vec![0 as u32; body.game.players.len()];
+    for _ in 0..body.num {
+        let mut session = GameSession::from_info(&body.game);
+        for _ in 0..body.depth {
+            session.spend_one_turn();
+        }
+        for idx in 0..body.game.players.len() {
+            let player = session.get_player(idx);
+            match player.state {
+                PlayerState::Bankrupted => { }
+                _ => counter[idx] += 1,
+            }
+        }
+    }
+    let survival_rates = counter.iter().map(|&count| count as f32 / body.num as f32).collect();
+    let body = SurvivalResponse { survival_rates };
+    HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Starting the server...");
@@ -137,6 +171,7 @@ async fn main() -> std::io::Result<()> {
             .service(places)
             .service(tap)
             .service(money)
+            .service(survival)
             .service(
                 Files::new("/", "./web/build/")
                     .prefer_utf8(true)

@@ -29,41 +29,39 @@ export default function MoneyChart(props: IMoneyChartProps) {
     });
 
     return (
-        <div className="chart">
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                    width={500}
-                    height={300}
-                    data={data}
-                    margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                    }}
-                >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                        dataKey="money"
-                        fill="red"
-                        activeBar={<Rectangle fill="pink" stroke="blue" />}
-                    />
-                    <Bar
-                        dataKey="available"
-                        fill="green"
-                        activeBar={<Rectangle fill="pink" stroke="blue" />}
-                    />
-                    <Bar
-                        dataKey="total"
-                        fill="blue"
-                        activeBar={<Rectangle fill="pink" stroke="blue" />}
-                    />
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+                width={500}
+                height={300}
+                data={data}
+                margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                }}
+            >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar
+                    dataKey="money"
+                    fill="red"
+                    activeBar={<Rectangle fill="pink" stroke="blue" />}
+                />
+                <Bar
+                    dataKey="available"
+                    fill="green"
+                    activeBar={<Rectangle fill="pink" stroke="blue" />}
+                />
+                <Bar
+                    dataKey="total"
+                    fill="blue"
+                    activeBar={<Rectangle fill="pink" stroke="blue" />}
+                />
+            </BarChart>
+        </ResponsiveContainer>
     );
 }
