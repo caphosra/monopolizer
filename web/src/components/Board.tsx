@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
     fetchInit,
+    fetchMoney,
     fetchPlaces,
     fetchStep,
+    fetchSurvival,
+    fetchTap,
     IGameInfo,
     IPlaceProp,
 } from "../data/Interaction";
@@ -11,12 +14,17 @@ import "../styles/Board.css";
 import Header, { ContentType } from "./Header";
 import PlayerTable from "./PlayerTable";
 import { getPlaceInfoList } from "../data/Utils";
-import { Card } from "antd";
+import AnalysisBoard from "./AnalysisBoard";
 
 interface IBoardState {
     game: IGameInfo | null;
     places: IPlaceProp[] | null;
     content: ContentType;
+    taps: number[] | null;
+    money: number[] | null;
+    available: number[] | null;
+    total: number[] | null;
+    survivalRates: number[] | null;
 }
 
 function Board() {
@@ -24,6 +32,11 @@ function Board() {
         game: null,
         places: null,
         content: "places",
+        taps: null,
+        money: null,
+        available: null,
+        total: null,
+        survivalRates: null,
     });
 
     function onGameInfoUpdated(game: IGameInfo): void {
@@ -53,6 +66,55 @@ function Board() {
                 alert("Failed to fetch /init.");
             });
     }, []);
+
+    useEffect(() => {
+        if (state.game) {
+            fetchTap(state.game)
+                .then((taps) => {
+                    setState((state) => {
+                        return { ...state, taps };
+                    });
+                })
+                .catch(() => {
+                    alert("Failed to fetch /tap.");
+                });
+        }
+    }, [state.game]);
+
+    useEffect(() => {
+        if (state.game) {
+            fetchMoney(state.game)
+                .then((money) => {
+                    setState((state) => {
+                        return {
+                            ...state,
+                            money: money.money,
+                            available: money.available,
+                            total: money.total,
+                        };
+                    });
+                })
+                .catch(() => {
+                    alert("Failed to fetch /money.");
+                });
+        }
+    }, [state.game]);
+
+    useEffect(() => {
+        const NUM = 10;
+        const DEPTH = 10;
+        if (state.game) {
+            fetchSurvival(state.game, NUM, DEPTH)
+                .then((survivalRates) => {
+                    setState((state) => {
+                        return { ...state, survivalRates };
+                    });
+                })
+                .catch(() => {
+                    alert("Failed to fetch /survival.");
+                });
+        }
+    }, [state.game]);
 
     function onHouseClicked(placeId: number, nth: number): void {
         setState((state) => {
@@ -220,17 +282,13 @@ function Board() {
                                 />
                             ),
                             analysis: (
-                                <Card
-                                    bordered={true}
-                                    style={{
-                                        borderWidth: "5mm",
-                                        borderImageSource:
-                                            "linear-gradient(to right, red, blue)",
-                                        borderImageSlice: "1",
-                                    }}
-                                >
-                                    <div>Analysis</div>
-                                </Card>
+                                <AnalysisBoard
+                                    taps={state.taps}
+                                    money={state.money}
+                                    available={state.available}
+                                    total={state.total}
+                                    survivalRates={state.survivalRates}
+                                />
                             ),
                         }[state.content]
                     }
