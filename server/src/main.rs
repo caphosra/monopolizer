@@ -3,12 +3,12 @@ use actix_files::Files;
 use actix_web::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use actix_web::web::{Json, Query, Redirect};
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
-use mplz_lib::appraiser::Appraiser;
-use mplz_lib::player::PlayerState;
+use mplz_core::appraiser::Appraiser;
+use mplz_core::player::PlayerState;
 use serde::{Deserialize, Serialize};
 
-use mplz_lib::board::GameSession;
-use mplz_lib::serialization::{GameInfo, PlaceProp};
+use mplz_core::board::GameSession;
+use mplz_core::serialization::{GameInfo, PlaceProp};
 
 const MPLZ_API_PORT: u16 = 5391;
 

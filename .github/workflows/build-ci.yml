@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pkg: [mplz-cli, mplz-lib, mplz-serv]
+        pkg: [mplz-cli, mplz-core, mplz-server]
 
     steps:
       - uses: actions/checkout@v4

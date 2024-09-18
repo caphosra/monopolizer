@@ -3,7 +3,7 @@ use std::io::stdout;
 
 use crossterm::event::{read, Event, KeyCode, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use mplz_lib::board::GameSession;
+use mplz_core::board::GameSession;
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 

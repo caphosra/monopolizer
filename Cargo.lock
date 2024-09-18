@@ -388,9 +388,9 @@ checksum = "df8670b8c7b9dae1793364eafadf7239c40d669904660c5960d74cfd80b46a53"
 
 [[package]]
 name = "cc"
-version = "1.1.20"
+version = "1.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45bcde016d64c21da4be18b655631e5ab6d3107607e71a73a9f53eb48aae23fb"
+checksum = "07b1695e2c7e8fc85310cde85aeaab7e3097f593c91d209d3f9df76c928100f0"
 dependencies = [
  "jobserver",
  "libc",
@@ -841,12 +841,12 @@ name = "mplz-cli"
 version = "0.1.0"
 dependencies = [
  "crossterm 0.26.1",
- "mplz-lib",
+ "mplz-core",
  "tui",
 ]
 
 [[package]]
-name = "mplz-lib"
+name = "mplz-core"
 version = "0.1.0"
 dependencies = [
  "calamine",
@@ -857,13 +857,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "mplz-serv"
+name = "mplz-server"
 version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-files",
  "actix-web",
- "mplz-lib",
+ "mplz-core",
  "serde",
  "serde_json",
 ]

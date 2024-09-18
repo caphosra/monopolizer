@@ -1,12 +1,12 @@
 [package]
-name = "mplz-serv"
+name = "mplz-server"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies.mplz-lib]
-path="../lib"
+[dependencies.mplz-core]
+path="../core"
 
 [dependencies]
 actix-cors = "0.7.0"

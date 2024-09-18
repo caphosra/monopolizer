@@ -4,8 +4,8 @@ use std::error::Error;
 use std::io::{stdin, stdout, BufRead, Write};
 
 use crate::renderer::start_render_loop;
-use mplz_lib::board::GameSession;
-use mplz_lib::command::{AnalysisCommandArg, GameCommand};
+use mplz_core::board::GameSession;
+use mplz_core::command::{AnalysisCommandArg, GameCommand};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut game: Option<GameSession> = None;
