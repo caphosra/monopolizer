@@ -24,3 +24,23 @@ jobs:
         run:
           npx eslint ./src
         working-directory: ./web
+
+  cargo-lint:
+    name: ${{ matrix.pkg }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: [mplz-cli, mplz-core, mplz-server]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - name: Check with clippy
+        run:
+          cargo clippy --package ${{ matrix.pkg }} --check
+        env:
+          RUSTFLAGS: "-Dwarnings"
