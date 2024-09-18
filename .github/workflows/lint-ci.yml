@@ -41,6 +41,6 @@ jobs:
           components: clippy
       - name: Check with clippy
         run:
-          cargo clippy --package ${{ matrix.pkg }} --check
+          cargo clippy --package ${{ matrix.pkg }}
         env:
           RUSTFLAGS: "-Dwarnings"
