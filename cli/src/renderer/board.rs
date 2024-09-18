@@ -207,8 +207,12 @@ pub fn get_board_renderer<'a, B: Backend>(
                     match (x, y) {
                         (0, y) => render_place(f, place.as_ref(), players, left_side_layouts[y]),
                         (10, y) => render_place(f, place.as_ref(), players, right_side_layouts[y]),
-                        (x, 0) => render_place(f, place.as_ref(), players, above_side_layouts[x - 1]),
-                        (x, 10) => render_place(f, place.as_ref(), players, bottom_side_layouts[x - 1]),
+                        (x, 0) => {
+                            render_place(f, place.as_ref(), players, above_side_layouts[x - 1])
+                        }
+                        (x, 10) => {
+                            render_place(f, place.as_ref(), players, bottom_side_layouts[x - 1])
+                        }
                         _ => {}
                     };
                 }

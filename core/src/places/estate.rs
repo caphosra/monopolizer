@@ -39,7 +39,7 @@ impl BoardPlace for Estate {
             if owner == turn {
                 EventKind::None("Lands their place.")
             } else if self.mortgaged {
-                    EventKind::None("The place is mortgaged.")
+                EventKind::None("The place is mortgaged.")
             } else {
                 let rent = self.get_rent(board);
                 EventKind::PayToOther(self.get_place_name(), owner, rent)

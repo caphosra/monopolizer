@@ -19,11 +19,7 @@ pub struct AnalysisCommandArg {
 
 impl std::fmt::Display for AnalysisCommandArg {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            serde_json::to_string_pretty(self).unwrap()
-        )
+        write!(f, "{}", serde_json::to_string_pretty(self).unwrap())
     }
 }
 

@@ -456,7 +456,10 @@ impl Board {
                 None
             }
         });
-        owners.next().unwrap().filter(|&possible_owner| { owners.all(|owner| owner == Some(possible_owner)) })
+        owners
+            .next()
+            .unwrap()
+            .filter(|&possible_owner| owners.all(|owner| owner == Some(possible_owner)))
     }
 
     ///
