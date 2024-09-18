@@ -50,7 +50,7 @@ const API_ROOT =
 export async function fetchInit(num: number): Promise<IGameInfo> {
     const response = await fetch(`${API_ROOT}/init?num=${num}`);
     if (!response.ok) {
-        throw "Failed to fetch /init.";
+        throw new Error("Failed to fetch /init.");
     }
     const info = (await response.json()) as IGameInfo;
     return info;
@@ -66,7 +66,7 @@ export async function fetchStep(
         body: JSON.stringify({ game, num }),
     });
     if (!response.ok) {
-        throw "Failed to fetch /step.";
+        throw new Error("Failed to fetch /step.");
     }
     const info = (await response.json()) as IGameInfo;
     return info;
@@ -79,7 +79,7 @@ export async function fetchPlaces(game: IGameInfo): Promise<IPlaceProp[]> {
         body: JSON.stringify(game),
     });
     if (!response.ok) {
-        throw "Failed to fetch /places.";
+        throw new Error("Failed to fetch /places.");
     }
     const places = (await response.json()) as { places: IPlaceProp[] };
     return places.places;
@@ -92,7 +92,7 @@ export async function fetchTap(game: IGameInfo): Promise<number[]> {
         body: JSON.stringify(game),
     });
     if (!response.ok) {
-        throw "Failed to fetch /tap.";
+        throw new Error("Failed to fetch /tap.");
     }
     const places = (await response.json()) as { taps: number[] };
     return places.taps;
@@ -113,7 +113,7 @@ export async function fetchMoney(
         body: JSON.stringify(game),
     });
     if (!response.ok) {
-        throw "Failed to fetch /money.";
+        throw new Error("Failed to fetch /money.");
     }
     const result = (await response.json()) as IFetchMoneyResponse;
     return result;
@@ -130,7 +130,7 @@ export async function fetchSurvival(
         body: JSON.stringify({ game, num, depth }),
     });
     if (!response.ok) {
-        throw "Failed to fetch /survival.";
+        throw new Error("Failed to fetch /survival.");
     }
     const result = (await response.json()) as { survival_rates: number[] };
     return result.survival_rates;

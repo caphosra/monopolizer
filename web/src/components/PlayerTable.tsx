@@ -40,7 +40,7 @@ export default function PlayerTable(props: IPlayerProps) {
             <InputNumber
                 prefix="$"
                 value={content.money}
-                disabled={content.status == "Bankrupted"}
+                disabled={content.status === "Bankrupted"}
                 onChange={(val) => props.onMoneyChanged(content.id, val ?? 0)}
             />
         );
@@ -59,7 +59,7 @@ export default function PlayerTable(props: IPlayerProps) {
                 key={`select-position${content.id}`}
                 style={{ width: "100%" }}
                 value={content.position}
-                disabled={content.status == "Bankrupted"}
+                disabled={content.status === "Bankrupted"}
                 options={options}
                 onChange={(pos) => props.onPositionChanged(content.id, pos)}
             />
