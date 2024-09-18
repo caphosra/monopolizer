@@ -123,7 +123,7 @@ struct SurvivalRequest {
 
 #[derive(Serialize)]
 struct SurvivalResponse {
-    survival_rates: Vec<f32>
+    survival_rates: Vec<f32>,
 }
 
 #[post("/survival")]
@@ -137,12 +137,15 @@ async fn survival(body: Json<SurvivalRequest>) -> impl Responder {
         for idx in 0..body.game.players.len() {
             let player = session.get_player(idx);
             match player.state {
-                PlayerState::Bankrupted => { }
+                PlayerState::Bankrupted => {}
                 _ => counter[idx] += 1,
             }
         }
     }
-    let survival_rates = counter.iter().map(|&count| count as f32 / body.num as f32).collect();
+    let survival_rates = counter
+        .iter()
+        .map(|&count| count as f32 / body.num as f32)
+        .collect();
     let body = SurvivalResponse { survival_rates };
     HttpResponse::Ok().body(serde_json::to_string_pretty(&body).unwrap())
 }
