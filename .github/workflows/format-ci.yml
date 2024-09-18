@@ -1,4 +1,4 @@
-name: Web CI
+name: Format CI
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  fmt:
-    name: Check code formatting
+  web-fmt:
+    name: mplz-web
     runs-on: ubuntu-latest
 
     steps:
@@ -24,20 +24,20 @@ jobs:
         run:
           npx prettier --check ./src
         working-directory: ./web
-  lint:
-    name: Check code linting
+
+  cargo-fmt:
+    name: ${{ matrix.pkg }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        pkg: [mplz-cli, mplz-lib, mplz-serv]
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          node-version: 20
-      - name: Install dependencies
+          components: rustfmt
+      - name: Check with rustfmt
         run:
-          npm install --include=dev
-        working-directory: ./web
-      - name: Check with ESLint
-        run:
-          npx eslint ./src
-        working-directory: ./web
+          cargo fmt --package ${{ matrix.version }} --check
