@@ -4,10 +4,10 @@ use tui::style::{Color, Style};
 use tui::widgets::{Block, Borders, Paragraph};
 use tui::Frame;
 
-use mplzlib::appraiser::Appraiser;
-use mplzlib::board::Board;
-use mplzlib::places::{BoardColor, BoardPlace};
-use mplzlib::player::{Player, PlayerState};
+use mplz_lib::appraiser::Appraiser;
+use mplz_lib::board::Board;
+use mplz_lib::places::{BoardColor, BoardPlace};
+use mplz_lib::player::{Player, PlayerState};
 
 ///
 /// Renders a place.
