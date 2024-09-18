@@ -1,0 +1,42 @@
+name: Build CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  web-build:
+    name: mplz-web
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run:
+          npm install
+        working-directory: ./web
+      - name: Build the project
+        run:
+          npm run build
+        working-directory: ./web
+
+  cargo-build:
+    name: ${{ matrix.pkg }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: [mplz-cli, mplz-core, mplz-server]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Build the project
+        run:
+          cargo build --package ${{ matrix.pkg }} --verbose

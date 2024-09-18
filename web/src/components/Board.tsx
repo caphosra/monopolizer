@@ -146,7 +146,7 @@ function Board() {
     function onMortgagedClicked(placeId: number): void {
         setState((state) => {
             const places = state.game!.places.map((place) => {
-                if (place.place_id == placeId) {
+                if (place.place_id === placeId) {
                     const is_mortgaged = !place.is_mortgaged;
                     if (place.houses) {
                         return { ...place, is_mortgaged, houses: 0 };
@@ -174,7 +174,7 @@ function Board() {
     function onOwnerChanged(placeId: number, owner_id: number | null): void {
         setState((state) => {
             const places = state.game!.places.map((place) => {
-                if (place.place_id == placeId) {
+                if (place.place_id === placeId) {
                     return { ...place, owner: owner_id ?? undefined };
                 }
                 return place;

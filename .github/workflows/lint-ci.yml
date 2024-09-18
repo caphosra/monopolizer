@@ -1,0 +1,46 @@
+name: Lint CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  web-lint:
+    name: mplz-web
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run:
+          npm install --include=dev
+        working-directory: ./web
+      - name: Check with ESLint
+        run:
+          npx eslint ./src
+        working-directory: ./web
+
+  cargo-lint:
+    name: ${{ matrix.pkg }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: [mplz-cli, mplz-core, mplz-server]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - name: Check with clippy
+        run:
+          cargo clippy --package ${{ matrix.pkg }}
+        env:
+          RUSTFLAGS: "-Dwarnings"
