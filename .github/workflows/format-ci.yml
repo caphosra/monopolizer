@@ -40,4 +40,4 @@ jobs:
           components: rustfmt
       - name: Check with rustfmt
         run:
-          cargo fmt --package ${{ matrix.version }} --check
+          cargo fmt --package ${{ matrix.pkg }} --check
