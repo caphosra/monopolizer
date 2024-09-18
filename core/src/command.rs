@@ -17,9 +17,13 @@ pub struct AnalysisCommandArg {
     pub simulation_turn: usize,
 }
 
-impl AnalysisCommandArg {
-    pub fn to_string(&self) -> String {
-        serde_json::to_string_pretty(self).unwrap()
+impl std::fmt::Display for AnalysisCommandArg {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            serde_json::to_string_pretty(self).unwrap()
+        )
     }
 }
 

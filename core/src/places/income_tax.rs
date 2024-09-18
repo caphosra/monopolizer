@@ -7,7 +7,7 @@ pub struct IncomeTax {
 
 impl BoardPlace for IncomeTax {
     fn info(&self) -> String {
-        format!("{}", "Income Tax")
+        "Income Tax".to_string()
     }
 
     fn get_id(&self) -> usize {
@@ -60,7 +60,7 @@ impl BoardPlace for IncomeTax {
 }
 
 impl IncomeTax {
-    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(IncomeTax { id })
     }
 }

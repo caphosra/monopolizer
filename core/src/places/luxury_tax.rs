@@ -7,7 +7,7 @@ pub struct LuxuryTax {
 
 impl BoardPlace for LuxuryTax {
     fn info(&self) -> String {
-        format!("{}", "Luxury Tax")
+        "Luxury Tax".to_string()
     }
 
     fn get_id(&self) -> usize {
@@ -60,7 +60,7 @@ impl BoardPlace for LuxuryTax {
 }
 
 impl LuxuryTax {
-    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(LuxuryTax { id })
     }
 }

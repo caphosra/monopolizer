@@ -49,13 +49,10 @@ impl Appraiser {
                     // Get the rent of the property by having an imaginary player land on it.
                     //
                     // To act as an imaginary player, give `usize::Max`, which cannot be `player_id`, as `player_id`
-                    match place.get_action(usize::MAX, board) {
-                        EventKind::PayToOther(_, player_id, money) => {
-                            assert_eq!(player_id, player.player_id);
+                    if let EventKind::PayToOther(_, player_id, money) = place.get_action(usize::MAX, board) {
+                        assert_eq!(player_id, player.player_id);
 
-                            tap += money;
-                        }
-                        _ => {}
+                        tap += money;
                     };
                 } else {
                     num_of_utilities += 1;

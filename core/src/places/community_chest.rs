@@ -7,7 +7,7 @@ pub struct CommunityChest {
 
 impl BoardPlace for CommunityChest {
     fn info(&self) -> String {
-        format!("{}", "Community Chest")
+        "Community Chest".to_string()
     }
 
     fn get_id(&self) -> usize {
@@ -60,7 +60,7 @@ impl BoardPlace for CommunityChest {
 }
 
 impl CommunityChest {
-    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(CommunityChest { id })
     }
 }

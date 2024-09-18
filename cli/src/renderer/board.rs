@@ -15,7 +15,7 @@ use mplz_core::player::{Player, PlayerState};
 pub fn render_place<'a, B: Backend>(
     f: &mut Frame<B>,
     place: &'a Box<dyn BoardPlace + Send>,
-    players: &'a Vec<Player>,
+    players: &'a [Player],
     area: Rect,
 ) {
     let owner = place
@@ -59,7 +59,7 @@ pub fn render_place<'a, B: Backend>(
 
     let mut place_name = place.get_place_name().to_string();
     place_name.truncate(8);
-    let paragraph = Paragraph::new(vec![owner, current_status, players_on_place].join("\n"))
+    let paragraph = Paragraph::new([owner, current_status, players_on_place].join("\n"))
         .block(
             Block::default()
                 .title(place_name)
@@ -77,7 +77,7 @@ pub fn render_place<'a, B: Backend>(
 ///
 pub fn get_board_renderer<'a, B: Backend>(
     turn: usize,
-    players: &'a Vec<Player>,
+    players: &'a [Player],
     board: &'a mut Board,
 ) -> impl FnOnce(&mut Frame<B>) + 'a {
     move |f| {
@@ -146,7 +146,7 @@ pub fn get_board_renderer<'a, B: Backend>(
             )
             .split(player_infos_layouts[1]);
 
-        for (i, player) in players.iter().enumerate().into_iter() {
+        for (i, player) in players.iter().enumerate() {
             let (player_state, color) = match player.state {
                 PlayerState::Bankrupted => ("BANKRUPTED".to_string(), Color::Red),
                 PlayerState::InJail(turn) => (

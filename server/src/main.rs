@@ -128,17 +128,17 @@ struct SurvivalResponse {
 
 #[post("/survival")]
 async fn survival(body: Json<SurvivalRequest>) -> impl Responder {
-    let mut counter = vec![0 as u32; body.game.players.len()];
+    let mut counter = vec![0_u32; body.game.players.len()];
     for _ in 0..body.num {
         let mut session = GameSession::from_info(&body.game);
         for _ in 0..body.depth {
             session.spend_one_turn();
         }
-        for idx in 0..body.game.players.len() {
+        for (idx, cnt) in counter.iter_mut().enumerate() {
             let player = session.get_player(idx);
             match player.state {
                 PlayerState::Bankrupted => {}
-                _ => counter[idx] += 1,
+                _ => *cnt += 1,
             }
         }
     }

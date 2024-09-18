@@ -8,7 +8,7 @@ pub struct Nothing {
 
 impl BoardPlace for Nothing {
     fn info(&self) -> String {
-        format!("{}", self.name)
+        self.name.to_string()
     }
 
     fn get_id(&self) -> usize {
@@ -61,7 +61,7 @@ impl BoardPlace for Nothing {
 }
 
 impl Nothing {
-    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
         Box::new(Nothing { id, name })
     }
 }

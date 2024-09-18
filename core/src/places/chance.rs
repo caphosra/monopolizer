@@ -7,7 +7,7 @@ pub struct Chance {
 
 impl BoardPlace for Chance {
     fn info(&self) -> String {
-        format!("{}", "Chance")
+        "Chance".to_string()
     }
 
     fn get_id(&self) -> usize {
@@ -60,7 +60,7 @@ impl BoardPlace for Chance {
 }
 
 impl Chance {
-    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(Chance { id })
     }
 }

@@ -97,17 +97,15 @@ impl dyn PlayerStrategy + Send {
         state: &PlayerState,
         position: usize,
     ) {
-        let result = self.invest_raw(board, player_id, money, state, position);
+        self.invest_raw(board, player_id, money, state, position);
         board.validate_houses();
-
-        result
     }
 }
 
 pub struct ExpensiveHousesProtectionStrategy;
 
 impl ExpensiveHousesProtectionStrategy {
-    pub fn new() -> Box<dyn PlayerStrategy + Send> {
+    pub fn new_boxed() -> Box<dyn PlayerStrategy + Send> {
         Box::new(ExpensiveHousesProtectionStrategy {})
     }
 }

@@ -14,7 +14,7 @@ impl BoardPlace for Utilities {
         if let Some(owner) = self.owner {
             format!("{} owner:{}", self.name, owner)
         } else {
-            format!("{}", self.name)
+            self.name.to_string()
         }
     }
 
@@ -30,17 +30,15 @@ impl BoardPlace for Utilities {
         if let Some(owner) = self.owner {
             if owner == turn {
                 EventKind::None("Lands their place.")
+            } else if self.mortgaged {
+                EventKind::None("The place is mortgaged.")
             } else {
-                if self.mortgaged {
-                    EventKind::None("The place is mortgaged.")
-                } else {
-                    let rent = match self.get_own_num(board) {
-                        1 => DiceRolling::roll().unwrap() * 4,
-                        2 => DiceRolling::roll().unwrap() * 10,
-                        _ => panic!("The number of utilities is invalid."),
-                    };
-                    EventKind::PayToOther(self.get_place_name(), owner, rent)
-                }
+                let rent = match self.get_own_num(board) {
+                    1 => DiceRolling::roll().unwrap() * 4,
+                    2 => DiceRolling::roll().unwrap() * 10,
+                    _ => panic!("The number of utilities is invalid."),
+                };
+                EventKind::PayToOther(self.get_place_name(), owner, rent)
             }
         } else {
             EventKind::GivePlace(self.id, 150)
@@ -86,7 +84,7 @@ impl BoardPlace for Utilities {
 }
 
 impl Utilities {
-    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
         Box::new(Utilities {
             id,
             name,
@@ -102,7 +100,7 @@ impl Utilities {
             .filter(|place| {
                 place.get_color() == BoardColor::Utilities
                     && place.get_owner() == self.owner
-                    && place.is_mortgaged() == false
+                    && !place.is_mortgaged()
             })
             .count() as u32
     }

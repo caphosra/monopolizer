@@ -7,7 +7,7 @@ pub struct GoToJail {
 
 impl BoardPlace for GoToJail {
     fn info(&self) -> String {
-        format!("{}", "Go to Jail")
+        "Go to Jail".to_string()
     }
 
     fn get_id(&self) -> usize {
@@ -60,7 +60,7 @@ impl BoardPlace for GoToJail {
 }
 
 impl GoToJail {
-    pub fn new(id: usize) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize) -> Box<dyn BoardPlace + Send> {
         Box::new(GoToJail { id })
     }
 }

@@ -49,9 +49,9 @@ pub struct PlaceProp {
     pub rent: Option<u32>,
 }
 
-impl Into<PlayerInfo> for (i64, i64, String, i64, i64) {
-    fn into(self) -> PlayerInfo {
-        let (player_id, money, is_bankrupted, jail_turn, position) = self;
+impl From<(i64, i64, String, i64, i64)> for PlayerInfo {
+    fn from(val: (i64, i64, String, i64, i64)) -> PlayerInfo {
+        let (player_id, money, is_bankrupted, jail_turn, position) = val;
 
         PlayerInfo {
             player_id: player_id as usize,
@@ -102,7 +102,7 @@ impl GameSession {
         for player_info in &game_info.players {
             players.push(Player::from_info(
                 player_info,
-                ExpensiveHousesProtectionStrategy::new(),
+                ExpensiveHousesProtectionStrategy::new_boxed(),
             ));
         }
         game.players = players;
@@ -162,7 +162,7 @@ impl GameSession {
 
                 Player::from_info(
                     &(player_info.into()),
-                    ExpensiveHousesProtectionStrategy::new(),
+                    ExpensiveHousesProtectionStrategy::new_boxed(),
                 )
             })
             .collect();

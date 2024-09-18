@@ -116,8 +116,8 @@ impl dyn BoardPlace + Send {
 
 pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
     vec![
-        Nothing::new(0, "Go"),
-        Estate::new(
+        Nothing::new_boxed(0, "Go"),
+        Estate::new_boxed(
             1,
             BoardColor::Brown,
             "Mediterranean Avenue",
@@ -125,8 +125,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             50,
             vec![2, 4, 10, 30, 90, 160, 250],
         ),
-        CommunityChest::new(2),
-        Estate::new(
+        CommunityChest::new_boxed(2),
+        Estate::new_boxed(
             3,
             BoardColor::Brown,
             "Baltic Avenue",
@@ -134,9 +134,9 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             50,
             vec![4, 8, 20, 60, 180, 320, 450],
         ),
-        IncomeTax::new(4),
-        Railroad::new(5, "Reading Railroad"),
-        Estate::new(
+        IncomeTax::new_boxed(4),
+        Railroad::new_boxed(5, "Reading Railroad"),
+        Estate::new_boxed(
             6,
             BoardColor::LightBlue,
             "Oriental Avenue",
@@ -144,8 +144,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             50,
             vec![6, 12, 30, 90, 270, 400, 550],
         ),
-        Chance::new(7),
-        Estate::new(
+        Chance::new_boxed(7),
+        Estate::new_boxed(
             8,
             BoardColor::LightBlue,
             "Vermont Avenue",
@@ -153,7 +153,7 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             50,
             vec![6, 12, 30, 90, 270, 400, 550],
         ),
-        Estate::new(
+        Estate::new_boxed(
             9,
             BoardColor::LightBlue,
             "Connecticut Avenue",
@@ -161,8 +161,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             50,
             vec![8, 16, 40, 100, 300, 450, 600],
         ),
-        Nothing::new(10, "Just Visiting"),
-        Estate::new(
+        Nothing::new_boxed(10, "Just Visiting"),
+        Estate::new_boxed(
             11,
             BoardColor::LightPurple,
             "St. Charles Place",
@@ -170,8 +170,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             100,
             vec![10, 20, 50, 150, 450, 625, 750],
         ),
-        Utilities::new(12, "Electric Company"),
-        Estate::new(
+        Utilities::new_boxed(12, "Electric Company"),
+        Estate::new_boxed(
             13,
             BoardColor::LightPurple,
             "States Avenue",
@@ -179,7 +179,7 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             100,
             vec![10, 20, 50, 150, 450, 625, 750],
         ),
-        Estate::new(
+        Estate::new_boxed(
             14,
             BoardColor::LightPurple,
             "Virginia Avenue",
@@ -187,8 +187,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             100,
             vec![12, 24, 60, 180, 500, 700, 900],
         ),
-        Railroad::new(15, "Pennsylvania Railroad"),
-        Estate::new(
+        Railroad::new_boxed(15, "Pennsylvania Railroad"),
+        Estate::new_boxed(
             16,
             BoardColor::Orange,
             "St. James Place",
@@ -196,8 +196,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             100,
             vec![14, 28, 70, 200, 550, 750, 950],
         ),
-        CommunityChest::new(17),
-        Estate::new(
+        CommunityChest::new_boxed(17),
+        Estate::new_boxed(
             18,
             BoardColor::Orange,
             "Tennessee Avenue",
@@ -205,7 +205,7 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             100,
             vec![14, 28, 70, 200, 550, 750, 950],
         ),
-        Estate::new(
+        Estate::new_boxed(
             19,
             BoardColor::Orange,
             "New York Avenue",
@@ -213,8 +213,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             100,
             vec![16, 32, 80, 220, 600, 800, 1000],
         ),
-        Nothing::new(20, "Free Parking"),
-        Estate::new(
+        Nothing::new_boxed(20, "Free Parking"),
+        Estate::new_boxed(
             21,
             BoardColor::Red,
             "Kentucky Avenue",
@@ -222,8 +222,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             150,
             vec![18, 36, 90, 250, 700, 875, 1050],
         ),
-        Chance::new(22),
-        Estate::new(
+        Chance::new_boxed(22),
+        Estate::new_boxed(
             23,
             BoardColor::Red,
             "Indiana Avenue",
@@ -231,7 +231,7 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             150,
             vec![18, 36, 90, 250, 700, 875, 1050],
         ),
-        Estate::new(
+        Estate::new_boxed(
             24,
             BoardColor::Red,
             "Illinois Avenue",
@@ -239,8 +239,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             150,
             vec![20, 40, 100, 300, 750, 925, 1100],
         ),
-        Railroad::new(25, "B. & O. Railroad"),
-        Estate::new(
+        Railroad::new_boxed(25, "B. & O. Railroad"),
+        Estate::new_boxed(
             26,
             BoardColor::Yellow,
             "Atlantic Avenue",
@@ -248,7 +248,7 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             150,
             vec![22, 44, 110, 330, 800, 975, 1150],
         ),
-        Estate::new(
+        Estate::new_boxed(
             27,
             BoardColor::Yellow,
             "Ventnor Avenue",
@@ -256,8 +256,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             150,
             vec![22, 44, 110, 330, 800, 975, 1150],
         ),
-        Utilities::new(28, "Water Works"),
-        Estate::new(
+        Utilities::new_boxed(28, "Water Works"),
+        Estate::new_boxed(
             29,
             BoardColor::Yellow,
             "Marvin Gardens",
@@ -265,8 +265,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             150,
             vec![24, 48, 120, 360, 850, 1025, 1200],
         ),
-        GoToJail::new(30),
-        Estate::new(
+        GoToJail::new_boxed(30),
+        Estate::new_boxed(
             31,
             BoardColor::Green,
             "Pacific Avenue",
@@ -274,7 +274,7 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             200,
             vec![26, 52, 130, 390, 900, 1100, 1275],
         ),
-        Estate::new(
+        Estate::new_boxed(
             32,
             BoardColor::Green,
             "North Carolina Avenue",
@@ -282,8 +282,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             200,
             vec![26, 52, 130, 390, 900, 1100, 1275],
         ),
-        CommunityChest::new(33),
-        Estate::new(
+        CommunityChest::new_boxed(33),
+        Estate::new_boxed(
             34,
             BoardColor::Green,
             "Pennsylvania Avenue",
@@ -291,9 +291,9 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             200,
             vec![28, 56, 150, 450, 1000, 1200, 1400],
         ),
-        Railroad::new(35, "Short Line"),
-        Chance::new(36),
-        Estate::new(
+        Railroad::new_boxed(35, "Short Line"),
+        Chance::new_boxed(36),
+        Estate::new_boxed(
             37,
             BoardColor::Blue,
             "Park Place",
@@ -301,8 +301,8 @@ pub fn get_place_list() -> Vec<Box<dyn BoardPlace + Send>> {
             200,
             vec![35, 70, 175, 500, 1100, 1300, 1500],
         ),
-        LuxuryTax::new(38),
-        Estate::new(
+        LuxuryTax::new_boxed(38),
+        Estate::new_boxed(
             39,
             BoardColor::Blue,
             "Boardwalk",

@@ -13,7 +13,7 @@ impl BoardPlace for Railroad {
         if let Some(owner) = self.owner {
             format!("{} owner:{}", self.name, owner)
         } else {
-            format!("{}", self.name)
+            self.name.to_string()
         }
     }
 
@@ -29,19 +29,17 @@ impl BoardPlace for Railroad {
         if let Some(owner) = self.owner {
             if owner == turn {
                 EventKind::None("Lands their place.")
+            } else if self.mortgaged {
+                EventKind::None("The place is mortgaged.")
             } else {
-                if self.mortgaged {
-                    EventKind::None("The place is mortgaged.")
-                } else {
-                    let rent = match self.get_own_num(board) {
-                        1 => 25,
-                        2 => 50,
-                        3 => 100,
-                        4 => 200,
-                        _ => panic!("The number of railroads is invalid."),
-                    };
-                    EventKind::PayToOther(self.get_place_name(), owner, rent)
-                }
+                let rent = match self.get_own_num(board) {
+                    1 => 25,
+                    2 => 50,
+                    3 => 100,
+                    4 => 200,
+                    _ => panic!("The number of railroads is invalid."),
+                };
+                EventKind::PayToOther(self.get_place_name(), owner, rent)
             }
         } else {
             EventKind::GivePlace(self.id, 200)
@@ -87,7 +85,7 @@ impl BoardPlace for Railroad {
 }
 
 impl Railroad {
-    pub fn new(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
+    pub fn new_boxed(id: usize, name: &'static str) -> Box<dyn BoardPlace + Send> {
         Box::new(Railroad {
             id,
             name,
@@ -103,7 +101,7 @@ impl Railroad {
             .filter(|place| {
                 place.get_color() == BoardColor::Railroad
                     && place.get_owner() == self.owner
-                    && place.is_mortgaged() == false
+                    && !place.is_mortgaged()
             })
             .count() as u32
     }

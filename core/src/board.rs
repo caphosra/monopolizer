@@ -24,9 +24,10 @@ pub struct GameSummaryFragment {
     pub tap: u32,
 }
 
-impl ToString for GameSummaryFragment {
-    fn to_string(&self) -> String {
-        format!(
+impl std::fmt::Display for GameSummaryFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
             "{},{},{},{}",
             self.turn_count, self.id, self.money, self.tap
         )
@@ -74,7 +75,7 @@ impl GameSession {
     ///
     pub fn new(player_num: u32) -> Self {
         let players = (0..player_num)
-            .map(|id| Player::new(id as usize, ExpensiveHousesProtectionStrategy::new()))
+            .map(|id| Player::new(id as usize, ExpensiveHousesProtectionStrategy::new_boxed()))
             .collect::<Vec<_>>();
 
         GameSession {
@@ -112,10 +113,7 @@ impl GameSession {
     pub fn count_active_players(&self) -> usize {
         self.players
             .iter()
-            .filter(|player| match player.state {
-                PlayerState::Bankrupted => false,
-                _ => true,
-            })
+            .filter(|player| !matches!(player.state, PlayerState::Bankrupted))
             .count()
     }
 
@@ -123,14 +121,14 @@ impl GameSession {
     /// Gets a player whose turn it is.
     ///
     pub fn get_current_player(&self) -> &Player {
-        self.get_player(self.turn as usize)
+        self.get_player(self.turn)
     }
 
     ///
     /// Gets a player whose turn it is as mutable.
     ///
     pub fn get_current_player_mut(&mut self) -> &mut Player {
-        self.get_player_mut(self.turn as usize)
+        self.get_player_mut(self.turn)
     }
 
     ///
@@ -151,12 +149,12 @@ impl GameSession {
                     msg
                 );
 
-                let current_player = &mut self.players[turn as usize];
+                let current_player = &mut self.players[turn];
                 let (result, mut logs) = current_player.pay(&mut self.board, dollars);
                 self.logs.append(&mut logs);
 
                 // If the player cannot pay, their property will be returned to the bank.
-                if let Err(_) = result {
+                if result.is_err() {
                     game_log!(
                         self,
                         "[PLAYER{}] All of the properties are returned to the bank.",
@@ -188,7 +186,7 @@ impl GameSession {
                     msg
                 );
 
-                let current_player = &mut self.players[turn as usize];
+                let current_player = &mut self.players[turn];
                 let (result, mut logs) = current_player.pay(&mut self.board, dollars);
                 self.logs.append(&mut logs);
 
@@ -394,6 +392,12 @@ pub struct Board {
     pub places: Vec<Box<dyn BoardPlace + Send>>,
 }
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Board {
     ///
     /// Generates a board.
@@ -452,15 +456,7 @@ impl Board {
                 None
             }
         });
-        if let Some(possible_owner) = owners.next().unwrap() {
-            if owners.all(|owner| owner == Some(possible_owner)) {
-                Some(possible_owner)
-            } else {
-                None
-            }
-        } else {
-            None
-        }
+        owners.next().unwrap().filter(|&possible_owner| { owners.all(|owner| owner == Some(possible_owner)) })
     }
 
     ///

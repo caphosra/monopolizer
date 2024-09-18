@@ -38,13 +38,11 @@ impl BoardPlace for Estate {
         if let Some(owner) = self.owner {
             if owner == turn {
                 EventKind::None("Lands their place.")
-            } else {
-                if self.mortgaged {
+            } else if self.mortgaged {
                     EventKind::None("The place is mortgaged.")
-                } else {
-                    let rent = self.get_rent(board);
-                    EventKind::PayToOther(self.get_place_name(), owner, rent)
-                }
+            } else {
+                let rent = self.get_rent(board);
+                EventKind::PayToOther(self.get_place_name(), owner, rent)
             }
         } else {
             EventKind::GivePlace(self.id, self.price)
@@ -90,7 +88,7 @@ impl BoardPlace for Estate {
 }
 
 impl Estate {
-    pub fn new(
+    pub fn new_boxed(
         id: usize,
         color: BoardColor,
         name: &'static str,
