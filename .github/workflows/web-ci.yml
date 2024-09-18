@@ -1,0 +1,43 @@
+name: Web CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  fmt:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run:
+          npm install --include=dev
+        working-directory: ./web
+      - name: Check with Prettier
+        run:
+          npx prettier --check ./src
+        working-directory: ./web
+  lint:
+    name: Check code linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run:
+          npm install --include=dev
+        working-directory: ./web
+      - name: Check with ESLint
+        run:
+          npx eslint ./src
+        working-directory: ./web
