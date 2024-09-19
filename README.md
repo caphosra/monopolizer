@@ -1,5 +1,7 @@
 # Monopolizer
 
+[![Build CI](https://github.com/caphosra/monopolizer/actions/workflows/build-ci.yml/badge.svg)](https://github.com/caphosra/monopolizer/actions/workflows/build-ci.yml)[![Lint CI](https://github.com/caphosra/monopolizer/actions/workflows/lint-ci.yml/badge.svg)](https://github.com/caphosra/monopolizer/actions/workflows/lint-ci.yml)
+
 A collection of tools for simulating or analyzing Monopoly game.
 
 <p align="center">
